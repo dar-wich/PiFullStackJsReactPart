@@ -1,5 +1,7 @@
 import React, { Component, lazy, Suspense } from 'react';
-import { Bar, Line } from 'react-chartjs-2';
+import {   Pagination, PaginationItem, PaginationLink } from 'reactstrap';
+import ReactDOM from 'react-dom';
+import { Bar, Line ,Pie,Doughnut,Polar} from 'react-chartjs-2';
 import {
   Badge,
   Button,
@@ -19,9 +21,11 @@ import {
   Progress,
   Row,
   Table,
+  CardColumns
 } from 'reactstrap';
 import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import { getStyle, hexToRgba } from '@coreui/coreui/dist/js/coreui-utilities'
+import { copyFile } from 'fs';
 
 const Widget03 = lazy(() => import('../../views/Widgets/Widget03'));
 
@@ -43,7 +47,9 @@ const cardChartData1 = {
     },
   ],
 };
-
+function sayHello(){
+  return ( <div>salmene</div>)
+}
 const cardChartOpts1 = {
   tooltips: {
     enabled: false,
@@ -325,6 +331,16 @@ const makeSparkLineData = (dataSetNo, variant) => {
   };
   return () => data;
 };
+const divStyle = {
+  width: '400px',
+ 
+};
+
+function sent(sentiment){
+  if(sentiment<0) return "negative review"
+  else if(sentiment==0) return "natural review"
+  else return "positive review"
+}
 
 const sparklineChartOpts = {
   tooltips: {
@@ -453,16 +469,104 @@ const mainChartOpts = {
 };
 
 class Dashboard extends Component {
+  
+  componentDidMount() {
+    fetch('http://localhost:9000/preproc/getAllTweets')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ tweets: data })
+      console.log(this.state.tweets)
+      
+    })
+    .catch(console.log)
+    fetch('http://localhost:9000/preproc/performance')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ performances: data })
+      console.log(this.state.performances)
+      
+      
+    })
+    .catch(console.log)
+
+    fetch('http://localhost:9000/thoughts/bestTopics')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ bestTopics: data })
+      console.log(this.state.performances)
+      
+      
+    })
+    .catch(console.log)
+
+
+    fetch('http://localhost:9000/thoughts/worstTopics')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ worstTopics: data })
+    
+      
+      
+    })
+    .catch(console.log)
+
+
+    fetch('http://localhost:9000/thoughts/naturalTopics')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ naturalTopics: data })
+    
+      
+      
+    })
+    .catch(console.log)
+  }
+  
+  i=10
+  j=0;
   constructor(props) {
+    
     super(props);
 
     this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
-
+    
     this.state = {
       dropdownOpen: false,
       radioSelected: 2,
+      tweets:[],
+      currentPage: 0,
+      performances:[],
+      bestTopics:[],
+      worstTopics:[],
+      naturalTopics:[]
+      
     };
+  
+  
+   
+  }
+  handleClick(e, index) {
+    
+    e.preventDefault();
+
+    this.setState({
+      currentPage: index
+    });
+    
+  }
+   handleNext(i,j){
+    console.log(i)
+   i+=10
+    j+=10
+    console.log(i)
+  }
+  cc(){
+    console.log("zzzzz")
+  }
+  handlePageChange(pageNumber) {
+    console.log(`active page is ${pageNumber}`);
+    this.setState({activePage: pageNumber});
   }
 
   toggle() {
@@ -480,13 +584,226 @@ class Dashboard extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
   render() {
+    //let element=this.state.tweets.slice(this.j,this.i);
+    const tabMonths=['January','February','March','April','May','June','July','August','September','October','November','December']
+    const { currentPage } = this.state;
+    const { tweets } = this.state;
+    const monthsReviews=[]
+    const valuesGoodReviews=[]
+    const valuesBadReviews=[]
+    const valuesNaturalReviews=[]
+    this.state.performances.map((data,i)=>{
+      
+      monthsReviews.push(tabMonths[i])
+valuesGoodReviews.push(data.nbGoodRev)
+valuesBadReviews.push(data.nbBadRev)
+valuesNaturalReviews.push(data.nbNaturalRev)
+    })
 
+   
+    
+    const bar = {
+      labels: monthsReviews,
+      datasets: [
+        {
+          label: 'Good Reviews',
+          backgroundColor: 'rgba(3,252,78)',
+          borderColor: 'rgba(3,252,78)',
+          borderWidth: 1,
+          hoverBackgroundColor: 'rgba(3,252,78)',
+          hoverBorderColor: 'rgba(3,252,78)',
+
+          data:valuesGoodReviews,
+        },
+        {
+          label: 'Natural Reviews',
+          backgroundColor: 'rgba(3,115,252)',
+          borderColor: 'rgba(3,115,252)',
+          borderWidth: 1,
+          hoverBackgroundColor: 'rgba(3,115,252)',
+          hoverBorderColor: 'rgba(3,115,252)',
+
+          data:valuesNaturalReviews,
+        },
+        {
+          label: 'Bad Reviews',
+          backgroundColor: 'rgba(255,99,132,0.2)',
+          borderColor: 'rgba(255,99,132,1)',
+          borderWidth: 1,
+          hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+          hoverBorderColor: 'rgba(255,99,132,1)',
+
+          data:valuesBadReviews,
+        },
+      ],
+      
+    };
+    const options = {
+      tooltips: {
+        enabled: false,
+        custom: CustomTooltips
+      },
+      maintainAspectRatio: false
+    }
+    var nbGood=0;
+    var nbBad=0;
+    var nbNatural=0;
+    this.state.tweets.map(data=>{
+      if(data.sentiment===0) nbNatural++;
+      else if (data.sentiment<0) nbBad++;
+      else nbGood++;
+    })
+    const pie = {
+      labels: [
+        'Good Reviews',
+        'Bad Reviews',
+        'Natural Reviews',
+      ],
+      datasets: [
+        {
+          data: [nbGood, nbBad, nbNatural],
+          backgroundColor: [
+            '#03fc8c',
+            '#fc0303',
+            '#03c2fc',
+          ],
+          hoverBackgroundColor: [
+            '#03fc8c',
+            '#fc0303',
+            '#03c2fc',
+          ],
+        }],
+    };
+    var goodTopics=[];
+    var goodOcc=[];
+    var badTopics=[];
+    var baddOcc=[];
+    var naturalTopics=[];
+    var naturaldOcc=[];
+    this.state.naturalTopics.map(data=>{
+      naturalTopics.push(data.topic)
+      naturaldOcc.push(data.occ)
+    })
+    this.state.bestTopics.map(data=>{
+      goodTopics.push(data.topic)
+      goodOcc.push(data.occ)
+    })
+    this.state.worstTopics.map(data=>{
+      badTopics.push(data.topic)
+      baddOcc.push(data.occ)
+    })
+    
+    const Gooddoughnut = {
+      labels:goodTopics.slice(0,10),
+      datasets: [
+        {
+          data:goodOcc.slice(0,10),
+          backgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+          hoverBackgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+          
+        }],
+    };
+    const Naturaldoughnut = {
+      labels:naturalTopics.slice(0,10),
+      datasets: [
+        {
+          data:naturaldOcc.slice(0,10),
+          backgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+          hoverBackgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+        }],
+    };
+    const baddoughnut = {
+      labels:badTopics.slice(0,10),
+      datasets: [
+        {
+          data:baddOcc.slice(0,10),
+          backgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+          hoverBackgroundColor: [
+            'lime',
+            'Cyan',
+            'Pink',
+            'Orange',
+            'Steel',
+            'Yellow',
+            'Magenta',
+            'Crimson',
+            'Teal',
+            'Brown',
+          ],
+        }],
+    };
+    
+    this.pageSize = 20;
+   // if(this.state.tweets.length!=0)
+    //this.pagesCount = this.state.tweets.length/20;
+    if(tweets.length!=0){
+      this.pagesCount = Math.ceil(tweets.length / this.pageSize);
+      console.log(tweets.length)
+    }
+    
     return (
       <div className="animated fadeIn">
+        
+     
         <Row>
           <Col xs="12" sm="6" lg="3">
             <Card className="text-white bg-info">
-              <CardBody className="pb-0">
+              <CardBody className="pb2-0">
                 <ButtonGroup className="float-right">
                   <ButtonDropdown id='card1' isOpen={this.state.card1} toggle={() => { this.setState({ card1: !this.state.card1 }); }}>
                     <DropdownToggle caret className="p-0" color="transparent">
@@ -581,549 +898,221 @@ class Dashboard extends Component {
             </Card>
           </Col>
         </Row>
-        <Row>
+        
+
+  <Card>
+            <CardHeader>
+              PERFORMANCE PER MONTH
+             
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Bar data={bar} options={options} />
+              </div>
+            </CardBody>
+          </Card>
+ 
+        <CardColumns className="cols-2">
+        <Col>
+        <Card>
+            <CardHeader>
+              Good Topics Distribution
+              <div className="card-header-actions">
+                <a href="http://www.chartjs.org" className="card-header-action">
+                  <small className="text-muted">docs</small>
+                </a>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Doughnut data={Gooddoughnut}  onElementsClick={elems => {  console.log( elems[0]._index);}}/>
+              </div>
+            </CardBody>
+          </Card>
+  </Col>
           <Col>
-            <Card>
-              <CardBody>
-                <Row>
-                  <Col sm="5">
-                    <CardTitle className="mb-0">Traffic</CardTitle>
-                    <div className="small text-muted">November 2015</div>
-                  </Col>
-                  <Col sm="7" className="d-none d-sm-inline-block">
-                    <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
-                    <ButtonToolbar className="float-right" aria-label="Toolbar with button groups">
-                      <ButtonGroup className="mr-3" aria-label="First group">
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(1)} active={this.state.radioSelected === 1}>Day</Button>
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(2)} active={this.state.radioSelected === 2}>Month</Button>
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(3)} active={this.state.radioSelected === 3}>Year</Button>
-                      </ButtonGroup>
-                    </ButtonToolbar>
-                  </Col>
-                </Row>
-                <div className="chart-wrapper" style={{ height: 300 + 'px', marginTop: 40 + 'px' }}>
-                  <Line data={mainChart} options={mainChartOpts} height={300} />
-                </div>
-              </CardBody>
-              <CardFooter>
-                <Row className="text-center">
-                  <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">Visits</div>
-                    <strong>29.703 Users (40%)</strong>
-                    <Progress className="progress-xs mt-2" color="success" value="40" />
-                  </Col>
-                  <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
-                    <div className="text-muted">Unique</div>
-                    <strong>24.093 Users (20%)</strong>
-                    <Progress className="progress-xs mt-2" color="info" value="20" />
-                  </Col>
-                  <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">Pageviews</div>
-                    <strong>78.706 Views (60%)</strong>
-                    <Progress className="progress-xs mt-2" color="warning" value="60" />
-                  </Col>
-                  <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">New Users</div>
-                    <strong>22.123 Users (80%)</strong>
-                    <Progress className="progress-xs mt-2" color="danger" value="80" />
-                  </Col>
-                  <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
-                    <div className="text-muted">Bounce Rate</div>
-                    <strong>Average Rate (40.15%)</strong>
-                    <Progress className="progress-xs mt-2" color="primary" value="40" />
-                  </Col>
-                </Row>
-              </CardFooter>
-            </Card>
+          <Card>
+            <CardHeader>
+            Bad Topics Distribution
+              <div className="card-header-actions">
+                <a href="http://www.chartjs.org" className="card-header-action">
+                  <small className="text-muted">docs</small>
+                </a>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Doughnut data={baddoughnut} />
+              </div>
+            </CardBody>
+          </Card>
           </Col>
-        </Row>
-
-        <Row>
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={this.loading()}>
-              <Widget03 dataBox={() => ({ variant: 'facebook', friends: '89k', feeds: '459' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(0)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
+          <Col>
+          <Card>
+            <CardHeader>
+            Natural Topics Distribution
+              <div className="card-header-actions">
+                <a href="http://www.chartjs.org" className="card-header-action">
+                  <small className="text-muted">docs</small>
+                </a>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Doughnut data={Naturaldoughnut} />
+              </div>
+            </CardBody>
+          </Card>
+          </Col>
+          <Col>
+          <Card>
+            <CardHeader>
+              REVIEWS DISTRIBUTION
+             
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Pie data={pie} />
+              </div>
+            </CardBody>
+          </Card>
           </Col>
 
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={this.loading()}>
-              <Widget03 dataBox={() => ({ variant: 'twitter', followers: '973k', tweets: '1.792' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(1)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
+        
+        </CardColumns>
+        
 
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={this.loading()}>
-              <Widget03 dataBox={() => ({ variant: 'linkedin', contacts: '500+', feeds: '292' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(2)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
+       
+        
 
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={this.loading()}>
-              <Widget03 dataBox={() => ({ variant: 'google-plus', followers: '894', circles: '92' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(3)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
-        </Row>
+  
+                    
+          
+                    
+                   
+                    
 
         <Row>
           <Col>
             <Card>
               <CardHeader>
-                Traffic {' & '} Sales
+              ALL REVIEWS
               </CardHeader>
               <CardBody>
-                <Row>
-                  <Col xs="12" md="6" xl="6">
-                    <Row>
-                      <Col sm="6">
-                        <div className="callout callout-info">
-                          <small className="text-muted">New Clients</small>
-                          <br />
-                          <strong className="h4">9,123</strong>
-                          <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(0, brandPrimary)} options={sparklineChartOpts} width={100} height={30} />
-                          </div>
-                        </div>
-                      </Col>
-                      <Col sm="6">
-                        <div className="callout callout-danger">
-                          <small className="text-muted">Recurring Clients</small>
-                          <br />
-                          <strong className="h4">22,643</strong>
-                          <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(1, brandDanger)} options={sparklineChartOpts} width={100} height={30} />
-                          </div>
-                        </div>
-                      </Col>
-                    </Row>
-                    <hr className="mt-0" />
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                          Monday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="34" />
-                        <Progress className="progress-xs" color="danger" value="78" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Tuesday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="56" />
-                        <Progress className="progress-xs" color="danger" value="94" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Wednesday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="12" />
-                        <Progress className="progress-xs" color="danger" value="67" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Thursday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="43" />
-                        <Progress className="progress-xs" color="danger" value="91" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Friday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="22" />
-                        <Progress className="progress-xs" color="danger" value="73" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Saturday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="53" />
-                        <Progress className="progress-xs" color="danger" value="82" />
-                      </div>
-                    </div>
-                    <div className="progress-group mb-4">
-                      <div className="progress-group-prepend">
-                        <span className="progress-group-text">
-                        Sunday
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="9" />
-                        <Progress className="progress-xs" color="danger" value="69" />
-                      </div>
-                    </div>
-                    <div className="legend text-center">
-                      <small>
-                        <sup className="px-1"><Badge pill color="info">&nbsp;</Badge></sup>
-                        New clients
-                        &nbsp;
-                        <sup className="px-1"><Badge pill color="danger">&nbsp;</Badge></sup>
-                        Recurring clients
-                      </small>
-                    </div>
-                  </Col>
-                  <Col xs="12" md="6" xl="6">
-                    <Row>
-                      <Col sm="6">
-                        <div className="callout callout-warning">
-                          <small className="text-muted">Pageviews</small>
-                          <br />
-                          <strong className="h4">78,623</strong>
-                          <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(2, brandWarning)} options={sparklineChartOpts} width={100} height={30} />
-                          </div>
-                        </div>
-                      </Col>
-                      <Col sm="6">
-                        <div className="callout callout-success">
-                          <small className="text-muted">Organic</small>
-                          <br />
-                          <strong className="h4">49,123</strong>
-                          <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(3, brandSuccess)} options={sparklineChartOpts} width={100} height={30} />
-                          </div>
-                        </div>
-                      </Col>
-                    </Row>
-                    <hr className="mt-0" />
-                    <ul>
-                      <div className="progress-group">
-                        <div className="progress-group-header">
-                          <i className="icon-user progress-group-icon"></i>
-                          <span className="title">Male</span>
-                          <span className="ml-auto font-weight-bold">43%</span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="warning" value="43" />
-                        </div>
-                      </div>
-                      <div className="progress-group mb-5">
-                        <div className="progress-group-header">
-                          <i className="icon-user-female progress-group-icon"></i>
-                          <span className="title">Female</span>
-                          <span className="ml-auto font-weight-bold">37%</span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="warning" value="37" />
-                        </div>
-                      </div>
-                      <div className="progress-group">
-                        <div className="progress-group-header">
-                          <i className="icon-globe progress-group-icon"></i>
-                          <span className="title">Organic Search</span>
-                          <span className="ml-auto font-weight-bold">191,235 <span className="text-muted small">(56%)</span></span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="56" />
-                        </div>
-                      </div>
-                      <div className="progress-group">
-                        <div className="progress-group-header">
-                          <i className="icon-social-facebook progress-group-icon"></i>
-                          <span className="title">Facebook</span>
-                          <span className="ml-auto font-weight-bold">51,223 <span className="text-muted small">(15%)</span></span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="15" />
-                        </div>
-                      </div>
-                      <div className="progress-group">
-                        <div className="progress-group-header">
-                          <i className="icon-social-twitter progress-group-icon"></i>
-                          <span className="title">Twitter</span>
-                          <span className="ml-auto font-weight-bold">37,564 <span className="text-muted small">(11%)</span></span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="11" />
-                        </div>
-                      </div>
-                      <div className="progress-group">
-                        <div className="progress-group-header">
-                          <i className="icon-social-linkedin progress-group-icon"></i>
-                          <span className="title">LinkedIn</span>
-                          <span className="ml-auto font-weight-bold">27,319 <span className="text-muted small">(8%)</span></span>
-                        </div>
-                        <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="8" />
-                        </div>
-                      </div>
-                      <div className="divider text-center">
-                        <Button color="link" size="sm" className="text-muted" data-toggle="tooltip" data-placement="top"
-                                title="" data-original-title="show more"><i className="icon-options"></i></Button>
-                      </div>
-                    </ul>
-                  </Col>
-                </Row>
+                
                 <br />
-                <Table hover responsive className="table-outline mb-0 d-none d-sm-table">
+                <React.Fragment>
+      
+      <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
                   <thead className="thead-light">
                   <tr>
-                    <th className="text-center"><i className="icon-people"></i></th>
-                    <th>User</th>
-                    <th className="text-center">Country</th>
-                    <th>Usage</th>
-                    <th className="text-center">Payment Method</th>
-                    <th>Activity</th>
+                    <th ><i className="icon-people"></i></th>
+                    <th>Date</th>
+                    <th >Tweet</th>
+                    <th>Sentiment</th>
+                    
                   </tr>
                   </thead>
                   <tbody>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/1.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-success"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Yiorgos Avraamu</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-us h4 mb-0" title="us" id="us"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>50%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="success" value="50" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-mastercard" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>10 sec ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/2.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-danger"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Avram Tarasios</div>
-                      <div className="small text-muted">
+      {this.state.tweets
+          .slice(
+            currentPage * this.pageSize,
+            (currentPage + 1) * this.pageSize
+          )
+          .map((tweet, i) => 
+          <tr>
+                   
+          <td>
+            <div>{tweet.userName}</div>
+            
+          </td>
+          <td >
+            {tweet.Date}
+          </td>
+          <td>
+            <div style={divStyle}>
+             {tweet.textTranslated}
+             
+            </div>
+           
+          </td>
+          <td >
+           { sent(tweet.sentiment) }
+           
+          </td>
+          
+        </tr>
+          )}
 
-                        <span>Recurring</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-br h4 mb-0" title="br" id="br"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>10%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="info" value="10" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-visa" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>5 minutes ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/3.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-warning"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Quintin Ed</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-in h4 mb-0" title="in" id="in"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>74%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="warning" value="74" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-stripe" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>1 hour ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/4.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-secondary"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Enéas Kwadwo</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-fr h4 mb-0" title="fr" id="fr"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>98%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="danger" value="98" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-paypal" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Last month</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-success"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Agapetus Tadeáš</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-es h4 mb-0" title="es" id="es"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>22%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="info" value="22" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-google-wallet" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Last week</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                        <span className="avatar-status badge-danger"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Friderik Dávid</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-pl h4 mb-0" title="pl" id="pl"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>43%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="success" value="43" />
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-amex" style={{ fontSize: 24 + 'px' }}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Yesterday</strong>
-                    </td>
-                  </tr>
+                 
+              
+        <div>
+        
+         
+      </div>
+                  
+                  
+                  
+                 
                   </tbody>
                 </Table>
+                
+      <div className="pagination-wrapper ">
+        
+        <Pagination aria-label="Page navigation example">
+          
+          <PaginationItem disabled={currentPage <= 0}>
+            
+            <PaginationLink
+              onClick={e => this.handleClick(e, currentPage - 1)}
+              previous
+              href="#"
+            />
+            
+          </PaginationItem>
+
+          
+
+          <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
+            
+            <PaginationLink
+              onClick={e => this.handleClick(e, currentPage + 1)}
+              next
+              href="#"
+            />
+            
+          </PaginationItem>
+          
+        </Pagination>
+        
+      </div>
+    </React.Fragment>
+  
+               
               </CardBody>
             </Card>
           </Col>
         </Row>
+        
       </div>
     );
   }
+  /* render(){
+    return (
+      <div>
+        <center><h1>Contact List</h1></center>
+        {this.state.contacts.map((contact) => (
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{contact.name}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">{contact.email}</h6>
+              <p class="card-text">{contact.company.catchPhrase}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  };*/
 }
 
 export default Dashboard;
