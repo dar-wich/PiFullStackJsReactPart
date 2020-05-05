@@ -19,6 +19,16 @@ import {
   DropdownMenu,
   DropdownToggle,
   Progress,
+  Form,
+  FormGroup,
+  FormText,
+  FormFeedback,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButtonDropdown,
+  InputGroupText,
+  Label,
   Row,
   Table,
   CardColumns
@@ -26,8 +36,9 @@ import {
 import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import { getStyle, hexToRgba } from '@coreui/coreui/dist/js/coreui-utilities'
 import { copyFile } from 'fs';
+import { thisExpression } from '@babel/types';
 
-const Widget03 = lazy(() => import('../../views/Widgets/Widget03'));
+const Widget03 = lazy(() => import('../Widgets/Widget03'));
 
 const brandPrimary = getStyle('--primary')
 const brandSuccess = getStyle('--success')
@@ -468,13 +479,21 @@ const mainChartOpts = {
   },
 };
 
-class Dashboard extends Component {
+class Criteria extends Component {
   
   componentDidMount() {
+    var years=[]
+    
+    for(let i=0;i<5;i++){
+      years.push(new Date().getFullYear()-i)
+      console.log("zzzzz"+new Date().getFullYear()-i)
+      }
+  this.setState({tabYears:years})
     fetch('http://localhost:9000/preproc/getAllTweets')
     .then(res => res.json())
     .then((data) => {
       this.setState({ tweets: data })
+      this.setState({ finalTweets: data })
       console.log(this.state.tweets)
       
     })
@@ -527,7 +546,7 @@ class Dashboard extends Component {
   constructor(props) {
     
     super(props);
-
+    
     this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
     
@@ -539,12 +558,32 @@ class Dashboard extends Component {
       performances:[],
       bestTopics:[],
       worstTopics:[],
-      naturalTopics:[]
-      
+      naturalTopics:[],
+      tabYears:[],
+      checkGood:false,
+      checkBad:false,
+      checkNatural:false,
+      changesGood:[],
+      finalTweets:[],
+      changesYears:[],
+      changesSubject:[],
+      another:[]
     };
-  
-  
    
+   this.monthsSelection=this.monthsSelection.bind(this)
+   this.yearsSelection=this.yearsSelection.bind(this)
+   this.subjectSearch=this.subjectSearch.bind(this)
+   this.subjectSearchEff=this.subjectSearchEff.bind(this)
+   this.focusSubject=this.focusSubject.bind(this)
+  }
+  focusSubject(e){
+    this.setState({changesSubject:this.state.finalTweets})
+  }
+  subjectSearchEff(e){
+    if(e.keyCode==8)
+    {
+      this.setState({finalTweets:this.state.changesSubject})
+    }
   }
   handleClick(e, index) {
     
@@ -583,6 +622,105 @@ class Dashboard extends Component {
 
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
+  NaturalReviews(e){
+    var newTab=[]
+    
+    if(e=='Natural' ){
+     
+      
+      this.state.tweets.forEach(element => {
+        if(element.sentiment==0)
+        newTab.push(element)
+      });
+      
+     
+    }
+    if(e=='Good' ){
+     
+  
+      this.state.tweets.forEach(element => {
+        if(element.sentiment>0)
+        newTab.push(element)
+      });
+      
+     
+    }
+    if(e=='Bad' ){
+     
+      
+      this.state.tweets.forEach(element => {
+        if(element.sentiment<0)
+        newTab.push(element)
+      });
+      
+     
+    }
+
+    this.setState({finalTweets:newTab})
+ 
+    
+  }
+  
+  monthsSelection(e){
+    var tab=[]
+    var tab2=[]
+    if(e.target.value!=0){
+    
+      this.setState({changesGood:this.state.finalTweets})
+      this.state.finalTweets.forEach(element => {
+        if(new Date(element.Date).getMonth()+1==e.target.value){
+          tab.push(element)
+        }
+  
+      });
+      this.setState({finalTweets:tab})
+    }
+    else {
+
+      this.setState({finalTweets:this.state.changesGood})
+    }
+    
+   
+  }
+   
+  yearsSelection(e){
+    var tab=[]
+    var tab2=[]
+    if(e.target.value!=0){
+    
+      this.setState({changesYears:this.state.finalTweets})
+      this.state.finalTweets.forEach(element => {
+        if(new Date(element.Date).getFullYear()==e.target.value){
+          tab.push(element)
+        }
+  
+      });
+      this.setState({finalTweets:tab})
+    }
+    else {
+
+      this.setState({finalTweets:this.state.changesYears})
+    }
+    
+   
+  }
+  subjectSearch(e){
+    var tab=[]
+    if(e.target.value!=''){
+    //  this.setState({another:[...this.state.finalTweets]})
+     // this.setState({changesSubject:this.state.finalTweets})
+      this.state.finalTweets.forEach(element => {
+        var ch=""
+        ch=element.textTranslated
+        if(ch.includes(e.target.value)){
+          tab.push(element)
+        }
+  
+      });
+      this.setState({finalTweets:tab})
+    }
+    
+  }
   render() {
     
     //let element=this.state.tweets.slice(this.j,this.i);
@@ -797,106 +935,178 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       this.pagesCount = Math.ceil(tweets.length / this.pageSize);
       console.log(tweets.length)
     }
+   
     
     return (
       <div className="animated fadeIn">
-        
+         
      
-        <Row>
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-info">
-              <CardBody className="pb2-0">
-                <ButtonGroup className="float-right">
-                  <ButtonDropdown id='card1' isOpen={this.state.card1} toggle={() => { this.setState({ card1: !this.state.card1 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem disabled>Disabled action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData2} options={cardChartOpts2} height={70} />
-              </div>
-            </Card>
-          </Col>
+                  <Row>
+          <Col>
+            <Card>
+              
+              <CardHeader>
+              ALL REVIEWS
+              </CardHeader>
+              
+              <CardBody>
+              <FormGroup row>
+                    <Col md="3">
+                      <Label>Inline Radios</Label>
+                    </Col>
+                    <Col md="9">
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="inline-radio1" name="inline-radios" onClick={()=>this.NaturalReviews("Good")} value="Good" />
+                        <Label className="form-check-label" check htmlFor="inline-radio1">Good</Label>
+                      </FormGroup>
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="inline-radio2" name="inline-radios"  onClick={()=>this.NaturalReviews("Natural")} value="Natural" />
+                        <Label className="form-check-label" check htmlFor="inline-radio2">Natural</Label>
+                      </FormGroup>
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="inline-radio3" name="inline-radios"  onClick={()=>this.NaturalReviews("Bad")} value="Bad" />
+                        <Label className="form-check-label" check htmlFor="inline-radio3">Bad</Label>
+                      </FormGroup>
+                    </Col>
+                  </FormGroup>
+            
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="selectLg">Month</Label>
+                    </Col>
+                    <Col xs="12" md="9" size="lg">
+                      <Input type="select" name="selectLg" onChange={this.monthsSelection.bind(this)} id="selectLg" bsSize="lg">
+                        <option value="0"  >Please select</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                      </Input>
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="selectLg">Year</Label>
+                    </Col>
+                    <Col xs="12" md="9" size="lg">
+                      <Input type="select" name="selectLg" onChange={this.yearsSelection.bind(this)}   id="selectLg" bsSize="lg">
+                        <option value="0">Please select</option>
+                        {this.state.tabYears.map((y,i)=>
+                        <option value={y}>{y}</option>
+                        )
+                        }
+                        
+                        
+                      </Input>
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="text-input">Subject</Label>
+                    </Col>
+                    <Col xs="12" md="9">
+                      <Input type="text" id="text-input" onFocus={this.focusSubject} onChange={this.subjectSearch.bind(this)} onKeyDown={this.subjectSearchEff.bind(this)} name="text-input"  />
+                      <FormText color="muted">Type help word</FormText>
+                    </Col>
+                  </FormGroup>
+                <br />
+                <React.Fragment>
+      
+      <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
+                  <thead className="thead-light">
+                  <tr>
+                    <th ><i className="icon-people"></i></th>
+                    <th>Date</th>
+                    <th >Tweet</th>
+                    <th>Sentiment</th>
+                    
+                  </tr>
+                  </thead>
+                  <tbody>
+      {this.state.finalTweets
+          .slice(
+            currentPage * this.pageSize,
+            (currentPage + 1) * this.pageSize
+          )
+          .map((tweet, i) => 
+          <tr>
+                   
+          <td>
+            <div>{tweet.userName}</div>
+            
+          </td>
+          <td >
+            {tweet.Date}
+          </td>
+          <td>
+            <div style={divStyle}>
+             {tweet.textTranslated}
+             
+            </div>
+           
+          </td>
+          <td >
+           { sent(tweet.sentiment) }
+           
+          </td>
+          
+        </tr>
+          )}
 
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-primary">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <Dropdown id='card2' isOpen={this.state.card2} toggle={() => { this.setState({ card2: !this.state.card2 }); }}>
-                    <DropdownToggle className="p-0" color="transparent">
-                      <i className="icon-location-pin"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData1} options={cardChartOpts1} height={70} />
-              </div>
-            </Card>
-          </Col>
+                 
+              
+        <div>
+        
+         
+      </div>
+                  
+                  
+                  
+                 
+                  </tbody>
+                </Table>
+                
+      <div className="pagination-wrapper ">
+        
+        <Pagination aria-label="Page navigation example">
+          
+          <PaginationItem disabled={currentPage <= 0}>
+            
+            <PaginationLink
+              onClick={e => this.handleClick(e, currentPage - 1)}
+              previous
+              href="#"
+            />
+            
+          </PaginationItem>
 
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-warning">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <Dropdown id='card3' isOpen={this.state.card3} toggle={() => { this.setState({ card3: !this.state.card3 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper" style={{ height: '70px' }}>
-                <Line data={cardChartData3} options={cardChartOpts3} height={70} />
-              </div>
-            </Card>
-          </Col>
+          
 
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-danger">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <ButtonDropdown id='card4' isOpen={this.state.card4} toggle={() => { this.setState({ card4: !this.state.card4 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
+          <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
+            
+            <PaginationLink
+              onClick={e => this.handleClick(e, currentPage + 1)}
+              next
+              href="#"
+            />
+            
+          </PaginationItem>
+          
+        </Pagination>
+        
+      </div>
+    </React.Fragment>
+  
+               
               </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Bar data={cardChartData4} options={cardChartOpts4} height={70} />
-              </div>
             </Card>
           </Col>
         </Row>
@@ -999,107 +1209,6 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                    
                     
 
-        <Row>
-          <Col>
-            <Card>
-              <CardHeader>
-              ALL REVIEWS
-              </CardHeader>
-              <CardBody>
-                
-                <br />
-                <React.Fragment>
-      
-      <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
-                  <thead className="thead-light">
-                  <tr>
-                    <th ><i className="icon-people"></i></th>
-                    <th>Date</th>
-                    <th >Tweet</th>
-                    <th>Sentiment</th>
-                    
-                  </tr>
-                  </thead>
-                  <tbody>
-      {this.state.tweets
-          .slice(
-            currentPage * this.pageSize,
-            (currentPage + 1) * this.pageSize
-          )
-          .map((tweet, i) => 
-          <tr>
-                   
-          <td>
-            <div>{tweet.userName}</div>
-            
-          </td>
-          <td >
-            {tweet.Date}
-          </td>
-          <td>
-            <div style={divStyle}>
-             {tweet.textTranslated}
-             
-            </div>
-           
-          </td>
-          <td >
-           { sent(tweet.sentiment) }
-           
-          </td>
-          
-        </tr>
-          )}
-
-                 
-              
-        <div>
-        
-         
-      </div>
-                  
-                  
-                  
-                 
-                  </tbody>
-                </Table>
-                
-      <div className="pagination-wrapper ">
-        
-        <Pagination aria-label="Page navigation example">
-          
-          <PaginationItem disabled={currentPage <= 0}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage - 1)}
-              previous
-              href="#"
-            />
-            
-          </PaginationItem>
-
-          
-
-          <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage + 1)}
-              next
-              href="#"
-            />
-            
-          </PaginationItem>
-          
-        </Pagination>
-        
-      </div>
-    </React.Fragment>
-  
-               
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
         
       </div>
     );
@@ -1122,4 +1231,4 @@ valuesNaturalReviews.push(data.nbNaturalRev)
   };*/
 }
 
-export default Dashboard;
+export default Criteria;

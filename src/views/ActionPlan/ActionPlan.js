@@ -1,5 +1,14 @@
 import React, { Component, lazy, Suspense } from 'react';
-import {   Pagination, PaginationItem, PaginationLink } from 'reactstrap';
+import {   Pagination, PaginationItem, PaginationLink,Collapse, Form,
+  FormGroup,
+  FormText,
+  FormFeedback,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButtonDropdown,
+  InputGroupText,
+  Label, } from 'reactstrap';
 import ReactDOM from 'react-dom';
 import { Bar, Line ,Pie,Doughnut,Polar} from 'react-chartjs-2';
 import {
@@ -26,6 +35,8 @@ import {
 import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import { getStyle, hexToRgba } from '@coreui/coreui/dist/js/coreui-utilities'
 import { copyFile } from 'fs';
+import { thisExpression } from '@babel/types';
+import { runInThisContext } from 'vm';
 
 const Widget03 = lazy(() => import('../../views/Widgets/Widget03'));
 
@@ -468,7 +479,7 @@ const mainChartOpts = {
   },
 };
 
-class Dashboard extends Component {
+class ActionPlan extends Component {
   
   componentDidMount() {
     fetch('http://localhost:9000/preproc/getAllTweets')
@@ -494,6 +505,18 @@ class Dashboard extends Component {
     .then((data) => {
       this.setState({ bestTopics: data })
       console.log(this.state.performances)
+      
+      
+    })
+    .catch(console.log)
+    fetch('http://localhost:9000/thoughts/allProblems')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ problems: data })
+      var tf=[true];
+      for(let i=1;i<data.length;i++)
+      tf.push(false)
+     this.setState({accordion:tf})
       
       
     })
@@ -529,8 +552,7 @@ class Dashboard extends Component {
     super(props);
 
     this.toggle = this.toggle.bind(this);
-    this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
-    
+    this.toggleAccordion = this.toggleAccordion.bind(this);
     this.state = {
       dropdownOpen: false,
       radioSelected: 2,
@@ -539,12 +561,62 @@ class Dashboard extends Component {
       performances:[],
       bestTopics:[],
       worstTopics:[],
-      naturalTopics:[]
+      naturalTopics:[],
+      tabInputs:[""],
+      collapse: false,
+      accordion: [],
+      finalSolutions:[],
+      problems:[]
+      
+      
       
     };
   
   
-   
+    
+    
+  }
+  
+  
+    
+  
+  handleSubmit(event) {
+   // for(let i=0;i<this.state.tabInputs.length;i++){
+
+    var solutions=[event.target.solution.value]
+   var prob={
+      Title:event.target.Title.value,
+      Description:event.target.Description.value,
+      Solutions :solutions
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prob)
+  };
+    fetch('http://localhost:9000/thoughts/addProblem',requestOptions)
+    .then(res => res.json())
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      
+    })
+    .catch(console.log)
+    
+
+  }
+  toggle() {
+    this.setState({ collapse: !this.state.collapse });
+  }
+  
+  toggleAccordion(tab) {
+
+    const prevState = this.state.accordion;
+    const state = prevState.map((x, index) => tab === index ? !x : false);
+
+    this.setState({
+      accordion: state,
+    });
   }
   handleClick(e, index) {
     
@@ -580,11 +652,90 @@ class Dashboard extends Component {
       radioSelected: radioSelected,
     });
   }
+  removeProblem(data){
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+  };
+    fetch('http://localhost:9000/thoughts/removeProb',requestOptions)
+   
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.componentDidMount()
+    
+    })
+    .catch(console.log)
+  }
+  anotherSolution(data,i){
+    var obj=data;
+    var val="rmv"+i
+   var newVal=document.getElementById(val).value
+    obj.Solutions.push(newVal)
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+  };
+    fetch('http://localhost:9000/thoughts/updateSolution',requestOptions)
+   
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.componentDidMount()
+      document.getElementById(val).value=''
+    })
+    .catch(console.log)
+  }
+  removeSolution(data,j){
+    
+    var obj=data;
+   
+    obj.Solutions.splice(j,1)
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+  };
+    fetch('http://localhost:9000/thoughts/updateSolution',requestOptions)
+   
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.componentDidMount()
+      
+    })
+    .catch(console.log)
+  }
+  updateSolution(e,data,j,i){
+    console.log(j)
+    var val="index"+j+i
+   var newVal=document.getElementById(val).value
+    var obj=data;
+    obj.Solutions[j]=newVal;
+    console.log(obj)
+    console.log(newVal)
+   const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+  };
+    fetch('http://localhost:9000/thoughts/updateSolution',requestOptions)
+   
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.componentDidMount()
+      
+    })
+    .catch(console.log)
+  }
 
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
-
+  
   render() {
-    
+  
     //let element=this.state.tweets.slice(this.j,this.i);
     const tabMonths=['January','February','March','April','May','June','July','August','September','October','November','December']
     const { currentPage } = this.state;
@@ -654,27 +805,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       else if (data.sentiment<0) nbBad++;
       else nbGood++;
     })
-    const pie = {
-      labels: [
-        'Good Reviews',
-        'Bad Reviews',
-        'Natural Reviews',
-      ],
-      datasets: [
-        {
-          data: [nbGood, nbBad, nbNatural],
-          backgroundColor: [
-            '#03fc8c',
-            '#fc0303',
-            '#03c2fc',
-          ],
-          hoverBackgroundColor: [
-            '#03fc8c',
-            '#fc0303',
-            '#03c2fc',
-          ],
-        }],
-    };
+
     var goodTopics=[];
     var goodOcc=[];
     var badTopics=[];
@@ -695,100 +826,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       baddOcc.push(data.occ)
     })
     
-    const Gooddoughnut = {
-      labels:goodTopics.slice(0,10),
-      datasets: [
-        {
-          data:goodOcc.slice(0,10),
-          backgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-          hoverBackgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-          
-        }],
-    };
-    const Naturaldoughnut = {
-      labels:naturalTopics.slice(0,10),
-      datasets: [
-        {
-          data:naturaldOcc.slice(0,10),
-          backgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-          hoverBackgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-        }],
-    };
-    const baddoughnut = {
-      labels:badTopics.slice(0,10),
-      datasets: [
-        {
-          data:baddOcc.slice(0,10),
-          backgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-          hoverBackgroundColor: [
-            'lime',
-            'Cyan',
-            'Pink',
-            'Orange',
-            'Steel',
-            'Yellow',
-            'Magenta',
-            'Crimson',
-            'Teal',
-            'Brown',
-          ],
-        }],
-    };
+
     
     this.pageSize = 20;
    // if(this.state.tweets.length!=0)
@@ -797,196 +835,137 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       this.pagesCount = Math.ceil(tweets.length / this.pageSize);
       console.log(tweets.length)
     }
-    
+    var solution="index";
+    var rmv="rmv"
     return (
       <div className="animated fadeIn">
         
-     
-        <Row>
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-info">
-              <CardBody className="pb2-0">
-                <ButtonGroup className="float-right">
-                  <ButtonDropdown id='card1' isOpen={this.state.card1} toggle={() => { this.setState({ card1: !this.state.card1 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem disabled>Disabled action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData2} options={cardChartOpts2} height={70} />
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-primary">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <Dropdown id='card2' isOpen={this.state.card2} toggle={() => { this.setState({ card2: !this.state.card2 }); }}>
-                    <DropdownToggle className="p-0" color="transparent">
-                      <i className="icon-location-pin"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData1} options={cardChartOpts1} height={70} />
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-warning">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <Dropdown id='card3' isOpen={this.state.card3} toggle={() => { this.setState({ card3: !this.state.card3 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper" style={{ height: '70px' }}>
-                <Line data={cardChartData3} options={cardChartOpts3} height={70} />
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-danger">
-              <CardBody className="pb-0">
-                <ButtonGroup className="float-right">
-                  <ButtonDropdown id='card4' isOpen={this.state.card4} toggle={() => { this.setState({ card4: !this.state.card4 }); }}>
-                    <DropdownToggle caret className="p-0" color="transparent">
-                      <i className="icon-settings"></i>
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem>Action</DropdownItem>
-                      <DropdownItem>Another action</DropdownItem>
-                      <DropdownItem>Something else here</DropdownItem>
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
-              </CardBody>
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Bar data={cardChartData4} options={cardChartOpts4} height={70} />
-              </div>
-            </Card>
-          </Col>
-        </Row>
         
 
-  <Card>
-            <CardHeader>
-              PERFORMANCE PER MONTH
-             
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Bar data={bar} options={options} />
-              </div>
-            </CardBody>
-          </Card>
+
  
-        <CardColumns className="cols-2">
-        <Col>
-        <Card>
-            <CardHeader>
-              Good Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              
-              <div className="chart-wrapper">
-                <Doughnut data={Gooddoughnut}  onElementsClick={elems => { 
-                  
-                  console.log( elems[0]._index);
-                  }}/>
-              </div>
-            </CardBody>
-          </Card>
-  </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-            Bad Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Doughnut data={baddoughnut} />
-                
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-            Natural Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Doughnut data={Naturaldoughnut} />
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-              REVIEWS DISTRIBUTION
-             
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Pie data={pie} />
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
-
+     
         
-        </CardColumns>
+       
+          <Card>
+              <CardHeader>
+                <i className="fa fa-align-justify"></i> Frequent problems
+                <div className="card-header-actions">
+                  <Badge>NEW</Badge>
+                </div>
+              </CardHeader>
+              <CardBody>
+                <div id="accordion">
+                  {this.state.problems.map((data,i)=>
+                   
+                  <Card className="mb-0">
+                  <CardHeader id="headingOne">
+                    <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(i)} aria-expanded={this.state.accordion[i]} aria-controls="collapseOne">
+                      <h5 className="m-0 p-0">{data.Title}</h5>
+                    </Button>
+                    <div className="card-header-actions">
+                  <Badge>  <Button active  color="danger" onClick={() => this.removeProblem(data)}>Remove</Button>
+                    </Badge>
+                </div>
+                  </CardHeader>
+                  <Collapse isOpen={this.state.accordion[i]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                    <CardBody>
+                      <b>Descrition: </b>{data.Description}
+                      <hr></hr>
+                      <b>Solutions: </b><br></br>
+                      
+                      {data.Solutions.map((e,j)=>
+                     
+  
+  <div>
+    
+    <Input type="text" id={solution+j+i} name="solution"   defaultValue={e}  />
+    <Button  color="info" type="submit" active onClick={() => this.updateSolution(e,data,j,i)}  >Update</Button>
+    
+
+   
+                <Button  color="danger" active onClick={() => this.removeSolution(data,j)}>Remove</Button>
+            
+               
+  </div>  
+              
+             
+             
+              
+                        )}
+                       <hr></hr>
+                       <Input type="text" id={rmv+i} name="solution" placeholder="Another solution?"  />
+                       <Button  color="success" active onClick={() => this.anotherSolution(data,i)}>ok</Button>
+                    </CardBody>
+                  </Collapse>
+                </Card>
+           
+                    )}
+                  
+                  
+                 
+                </div>
+              </CardBody>
+            </Card>
+        
+         
+            <Card>
+              <CardHeader>
+                <strong>Basic Form</strong> Elements
+              </CardHeader>
+              <CardBody>
+                <Form  className="form-horizontal" onSubmit={this.handleSubmit}>
+                  
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="text-input">Problem</Label>
+                    </Col>
+                    <Col xs="12" md="9">
+                      <Input type="text" id="text-input" name="Title" placeholder="Problem" />
+                    </Col>
+                  </FormGroup>
+                 
+                  
+               
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="textarea-input">Descrition</Label>
+                    </Col>
+                    <Col xs="12" md="9">
+                      <Input type="textarea" name="Description" id="textarea-input" rows="9"
+                             placeholder="Content..." />
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Col md="3">
+                      <Label htmlFor="text-input">Solution</Label>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    
+                      
+                    </Col>
+                    <Col xs="12" md="9">
+             
+                      
+
+  <Input type="text" id="text-input" name="solution" placeholder="Problem"  />
+
+                     
+                      
+                     
+                  
+                      
+                    </Col>
+                  </FormGroup>
+                  <Button  type="submit"  size="sm" color="primary"><i className="fa fa-dot-circle-o"></i> Submit</Button>
+              
+                  
+                </Form>
+              </CardBody>
+              <CardFooter>
+              </CardFooter>
+            </Card>
+        
+      
         
 
        
@@ -1122,4 +1101,4 @@ valuesNaturalReviews.push(data.nbNaturalRev)
   };*/
 }
 
-export default Dashboard;
+export default ActionPlan;

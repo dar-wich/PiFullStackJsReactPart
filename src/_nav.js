@@ -156,6 +156,20 @@ export default {
       icon: 'icon-pie-chart',
     },
     {
+      name: 'Criteria',
+      url: '/criteria',
+      icon: 'icon-pie-chart',
+    },
+    {
+      name: 'ActionPlan',
+      url: '/ActionPlan',
+      icon: 'icon-speedometer',
+      badge: {
+        variant: 'info',
+        text: 'NEW',
+      },
+    },
+    {
       name: 'Icons',
       url: '/icons',
       icon: 'icon-star',

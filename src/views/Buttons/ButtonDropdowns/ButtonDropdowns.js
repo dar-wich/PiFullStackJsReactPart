@@ -243,9 +243,11 @@ class ButtonDropdowns extends Component {
                     Default Down
                   </DropdownToggle>
                   <DropdownMenu>
-                    <DropdownItem header>Header</DropdownItem>
+                    <DropdownItem header>Header xxxxxxx xxxxxx  xxxx xxx.</DropdownItem>
                     <DropdownItem disabled>Action Disabled</DropdownItem>
-                    <DropdownItem>Action</DropdownItem>
+                    <DropdownItem><span style={{ whiteSpace: 'pre-wrap' }}>Header xxxxxxx xxxxxx  xxxx xxx. Header xxxxxxx xxxxxx  xxxx xxx. Header xxxxxxx xxxxxx
+  xxxx xxx. Header xxxxxxx xxxxxx  xxxx xxx. Header xxxxxxx xxxxxx  xxxx xxx.Header xxxxxxx
+  xxxxxx  xxxx xxx. Header xxxxxxx xxxxxx  xxxx xxx. Header xxxxxxx xxxxxx  xxxx xxx.Header</span></DropdownItem>
                     <DropdownItem>Another Action</DropdownItem>
                   </DropdownMenu>
                 </ButtonDropdown>

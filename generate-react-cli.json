@@ -1,0 +1,20 @@
+{
+  "usesTypeScript": false,
+  "usesCssModule": true,
+  "cssPreprocessor": "css",
+  "testLibrary": "Enzyme",
+  "component": {
+    "path": "src/views",
+    "withStyle": true,
+    "withTest": true,
+    "withStory": false,
+    "withLazy": true
+  },
+  "page": {
+    "path": "src/pages",
+    "withStyle": true,
+    "withTest": true,
+    "withStory": false,
+    "withLazy": true
+  }
+}
