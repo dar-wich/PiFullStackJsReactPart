@@ -1,7 +1,7 @@
 import React, { Component, lazy, Suspense } from 'react';
-import {   Pagination, PaginationItem, PaginationLink } from 'reactstrap';
+import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import ReactDOM from 'react-dom';
-import { Bar, Line ,Pie,Doughnut,Polar} from 'react-chartjs-2';
+import { Bar, Line, Pie, Doughnut, Polar } from 'react-chartjs-2';
 import {
   Badge,
   Button,
@@ -58,8 +58,8 @@ const cardChartData1 = {
     },
   ],
 };
-function sayHello(){
-  return ( <div>salmene</div>)
+function sayHello() {
+  return (<div>salmene</div>)
 }
 const cardChartOpts1 = {
   tooltips: {
@@ -344,12 +344,12 @@ const makeSparkLineData = (dataSetNo, variant) => {
 };
 const divStyle = {
   width: '400px',
- 
+
 };
 
-function sent(sentiment){
-  if(sentiment<0) return "negative review"
-  else if(sentiment==0) return "natural review"
+function sent(sentiment) {
+  if (sentiment < 0) return "negative review"
+  else if (sentiment == 0) return "natural review"
   else return "positive review"
 }
 
@@ -443,7 +443,7 @@ const mainChartOpts = {
     mode: 'index',
     position: 'nearest',
     callbacks: {
-      labelColor: function(tooltipItem, chart) {
+      labelColor: function (tooltipItem, chart) {
         return { backgroundColor: chart.data.datasets[tooltipItem.datasetIndex].borderColor }
       }
     }
@@ -480,132 +480,134 @@ const mainChartOpts = {
 };
 
 class Criteria extends Component {
-  
+
   componentDidMount() {
-    var years=[]
-    
-    for(let i=0;i<5;i++){
-      years.push(new Date().getFullYear()-i)
-      console.log("zzzzz"+new Date().getFullYear()-i)
-      }
-  this.setState({tabYears:years})
+    var years = []
+
+    for (let i = 0; i < 5; i++) {
+      years.push(new Date().getFullYear() - i)
+      console.log("zzzzz" + new Date().getFullYear() - i)
+    }
+    this.setState({ tabYears: years })
     fetch('http://localhost:9000/preproc/getAllTweets')
-    .then(res => res.json())
-    .then((data) => {
-      this.setState({ tweets: data })
-      this.setState({ finalTweets: data })
-      console.log(this.state.tweets)
-      
-    })
-    .catch(console.log)
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ tweets: data })
+        this.setState({ finalTweets: data })
+        localStorage.setItem('all', JSON.stringify(data));
+        //console.log("result : "+localStorage.getItem('all'))
+
+
+      })
+      .catch(console.log)
     fetch('http://localhost:9000/preproc/performance')
-    .then(res => res.json())
-    .then((data) => {
-      this.setState({ performances: data })
-      console.log(this.state.performances)
-      
-      
-    })
-    .catch(console.log)
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ performances: data })
+        console.log(this.state.performances)
+
+
+      })
+      .catch(console.log)
 
     fetch('http://localhost:9000/thoughts/bestTopics')
-    .then(res => res.json())
-    .then((data) => {
-      this.setState({ bestTopics: data })
-      console.log(this.state.performances)
-      
-      
-    })
-    .catch(console.log)
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ bestTopics: data })
+        console.log(this.state.performances)
+
+
+      })
+      .catch(console.log)
 
 
     fetch('http://localhost:9000/thoughts/worstTopics')
-    .then(res => res.json())
-    .then((data) => {
-      this.setState({ worstTopics: data })
-      localStorage.setItem('worstTopics',JSON.stringify(data))
-      
-      
-    })
-    .catch(console.log)
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ worstTopics: data })
+        localStorage.setItem('worstTopics', JSON.stringify(data))
+
+
+      })
+      .catch(console.log)
 
 
     fetch('http://localhost:9000/thoughts/naturalTopics')
-    .then(res => res.json())
-    .then((data) => {
-      this.setState({ naturalTopics: data })
-    
-      
-      
-    })
-    .catch(console.log)
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ naturalTopics: data })
+
+
+
+      })
+      .catch(console.log)
   }
-  
-  i=10
-  j=0;
+
+  i = 10
+  j = 0;
   constructor(props) {
-    
+
     super(props);
-    
+
     this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
-    
+
     this.state = {
       dropdownOpen: false,
       radioSelected: 2,
-      tweets:[],
+      tweets: [],
       currentPage: 0,
-      performances:[],
-      bestTopics:[],
-      worstTopics:[],
-      naturalTopics:[],
-      tabYears:[],
-      checkGood:false,
-      checkBad:false,
-      checkNatural:false,
-      changesGood:[],
-      finalTweets:[],
-      changesYears:[],
-      changesSubject:[],
-      another:[]
+      performances: [],
+      bestTopics: [],
+      worstTopics: [],
+      naturalTopics: [],
+      tabYears: [],
+      checkGood: false,
+      checkBad: false,
+      checkNatural: false,
+      changesGood: [],
+      finalTweets: [],
+      changesYears: [],
+      changesSubject: [],
+      another: []
     };
-   
-   this.monthsSelection=this.monthsSelection.bind(this)
-   this.yearsSelection=this.yearsSelection.bind(this)
-   this.subjectSearch=this.subjectSearch.bind(this)
-   this.subjectSearchEff=this.subjectSearchEff.bind(this)
-   this.focusSubject=this.focusSubject.bind(this)
+
+    this.monthsSelection = this.monthsSelection.bind(this)
+    this.yearsSelection = this.yearsSelection.bind(this)
+    this.subjectSearch = this.subjectSearch.bind(this)
+    this.subjectSearchEff = this.subjectSearchEff.bind(this)
+    this.focusSubject = this.focusSubject.bind(this)
   }
-  focusSubject(e){
-    this.setState({changesSubject:this.state.finalTweets})
+  focusSubject(e) {
+    this.setState({ changesSubject: this.state.finalTweets })
+    this.setState({ finalTweets: JSON.parse(localStorage.getItem("all")) })
   }
-  subjectSearchEff(e){
-    if(e.keyCode==8)
-    {
-      this.setState({finalTweets:this.state.changesSubject})
+  subjectSearchEff(e) {
+    if (e.keyCode == 8) {
+      this.setState({ finalTweets: this.state.changesSubject })
     }
   }
   handleClick(e, index) {
-    
+
     e.preventDefault();
 
     this.setState({
       currentPage: index
     });
-    
+
   }
-   handleNext(i,j){
+  handleNext(i, j) {
     console.log(i)
-   i+=10
-    j+=10
+    i += 10
+    j += 10
     console.log(i)
   }
-  cc(){
+  cc() {
     console.log("zzzzz")
   }
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
-    this.setState({activePage: pageNumber});
+    this.setState({ activePage: pageNumber });
   }
 
   toggle() {
@@ -622,125 +624,169 @@ class Criteria extends Component {
 
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
-  NaturalReviews(e){
-    var newTab=[]
-    
-    if(e=='Natural' ){
-     
-      
-      this.state.tweets.forEach(element => {
-        if(element.sentiment==0)
-        newTab.push(element)
-      });
-      
-     
-    }
-    if(e=='Good' ){
-     
-  
-      this.state.tweets.forEach(element => {
-        if(element.sentiment>0)
-        newTab.push(element)
-      });
-      
-     
-    }
-    if(e=='Bad' ){
-     
-      
-      this.state.tweets.forEach(element => {
-        if(element.sentiment<0)
-        newTab.push(element)
-      });
-      
-     
-    }
+  NaturalReviews(e) {
+    var newTab = []
 
-    this.setState({finalTweets:newTab})
- 
-    
+    if (e == 'Natural') {
+
+
+      this.state.tweets.forEach(element => {
+        if (element.sentiment == 0)
+          newTab.push(element)
+      });
+
+    }
+    if (e == 'Good') {
+
+
+      this.state.tweets.forEach(element => {
+        if (element.sentiment > 0)
+          newTab.push(element)
+      });
+
+
+    }
+    if (e == 'Bad') {
+
+
+      this.state.tweets.forEach(element => {
+        if (element.sentiment < 0)
+          newTab.push(element)
+      });
+
+
+    }
+    if (e == 'all') {
+
+
+      this.componentDidMount()
+      document.getElementById("subject").value = "";
+
+
+    }
+    localStorage.setItem('all', JSON.stringify(newTab));
+    this.setState({ finalTweets: newTab })
+    this.performances(JSON.parse(localStorage.getItem("all")))
+    document.getElementById("monthes").value = 0;
+    document.getElementById("years").value = 0;
+
+
   }
-  
-  monthsSelection(e){
-    var tab=[]
-    var tab2=[]
-    if(e.target.value!=0){
-    
-      this.setState({changesGood:this.state.finalTweets})
-      this.state.finalTweets.forEach(element => {
-        if(new Date(element.Date).getMonth()+1==e.target.value){
+
+  performances(tab) {
+    //var tab = JSON.parse(localStorage.getItem("all"))
+    var res = []
+    for (let i = 0; i < new Date().getMonth() + 1; i++) {
+      var nbg = 0
+      var nbb = 0
+      var nbn = 0
+      tab.forEach(e => {
+        if ((new Date(e.Date).getMonth() == i) && (e.sentiment > 0)) {
+          nbg++
+        }
+        if ((new Date(e.Date).getMonth() == i) && (e.sentiment < 0)) {
+          nbb++
+        }
+        if ((new Date(e.Date).getMonth() == i) && (e.sentiment == 0)) {
+          nbn++
+        }
+      })
+      var obj = {
+        month: i + 1, nbBadRev: nbb, nbGoodRev: nbg, nbNaturalRev: nbn
+
+      }
+      res.push(obj)
+    }
+    this.setState({ performances: res })
+  }
+
+  monthsSelection(e) {
+    var tab = []
+    var tab2 = []
+
+
+    if (e.target.value != 0) {
+
+      tab2 = JSON.parse(localStorage.getItem("all"))
+      tab2.forEach(element => {
+        if (new Date(element.Date).getMonth() + 1 == e.target.value) {
           tab.push(element)
         }
-  
+
       });
-      this.setState({finalTweets:tab})
+      this.setState({ finalTweets: tab })
+      this.performances(tab)
     }
     else {
 
-      this.setState({finalTweets:this.state.changesGood})
+      this.setState({ finalTweets: JSON.parse(localStorage.getItem("all")) })
+      this.performances(JSON.parse(localStorage.getItem("all")))
+
     }
-    
-   
+
+
   }
-   
-  yearsSelection(e){
-    var tab=[]
-    var tab2=[]
-    if(e.target.value!=0){
-    
-      this.setState({changesYears:this.state.finalTweets})
-      this.state.finalTweets.forEach(element => {
-        if(new Date(element.Date).getFullYear()==e.target.value){
+
+  yearsSelection(e) {
+    var tab = []
+    var tab2 = []
+    if (e.target.value != 0) {
+      tab2 = JSON.parse(localStorage.getItem("all"))
+      tab2.forEach(element => {
+        if (new Date(element.Date).getFullYear() == e.target.value) {
           tab.push(element)
         }
-  
+
       });
-      this.setState({finalTweets:tab})
+      this.setState({ finalTweets: tab })
+      this.performances(tab)
     }
     else {
 
-      this.setState({finalTweets:this.state.changesYears})
+      this.setState({ finalTweets: JSON.parse(localStorage.getItem("all")) })
+      this.performances(JSON.parse(localStorage.getItem("all")))
     }
-    
-   
+
+
   }
-  subjectSearch(e){
-    var tab=[]
-    if(e.target.value!=''){
-    //  this.setState({another:[...this.state.finalTweets]})
-     // this.setState({changesSubject:this.state.finalTweets})
+  subjectSearch(e) {
+    var tab = []
+    if (e.target.value != '') {
+      //  this.setState({another:[...this.state.finalTweets]})
+      // this.setState({changesSubject:this.state.finalTweets})
       this.state.finalTweets.forEach(element => {
-        var ch=""
-        ch=element.textTranslated
-        if(ch.includes(e.target.value)){
+        var ch = ""
+        ch = element.textTranslated
+        if (ch.includes(e.target.value)) {
           tab.push(element)
         }
-  
+
       });
-      this.setState({finalTweets:tab})
+      this.setState({ finalTweets: tab })
+      this.performances(tab)
     }
-    
+
   }
   render() {
-    
+
     //let element=this.state.tweets.slice(this.j,this.i);
-    const tabMonths=['January','February','March','April','May','June','July','August','September','October','November','December']
+    const tabMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     const { currentPage } = this.state;
     const { tweets } = this.state;
-    const monthsReviews=[]
-    const valuesGoodReviews=[]
-    const valuesBadReviews=[]
-    const valuesNaturalReviews=[]
-    this.state.performances.map((data,i)=>{
-      
+    const monthsReviews = []
+    const valuesGoodReviews = []
+    const valuesBadReviews = []
+    const valuesNaturalReviews = []
+    this.state.performances.map((data, i) => {
+
       monthsReviews.push(tabMonths[i])
-valuesGoodReviews.push(data.nbGoodRev)
-valuesBadReviews.push(data.nbBadRev)
-valuesNaturalReviews.push(data.nbNaturalRev)
+      valuesGoodReviews.push(data.nbGoodRev)
+      valuesBadReviews.push(data.nbBadRev)
+      valuesNaturalReviews.push(data.nbNaturalRev)
     })
 
-   
-    
+
+
     const bar = {
       labels: monthsReviews,
       datasets: [
@@ -752,7 +798,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           hoverBackgroundColor: 'rgba(3,252,78)',
           hoverBorderColor: 'rgba(3,252,78)',
 
-          data:valuesGoodReviews,
+          data: valuesGoodReviews,
         },
         {
           label: 'Natural Reviews',
@@ -762,7 +808,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           hoverBackgroundColor: 'rgba(3,115,252)',
           hoverBorderColor: 'rgba(3,115,252)',
 
-          data:valuesNaturalReviews,
+          data: valuesNaturalReviews,
         },
         {
           label: 'Bad Reviews',
@@ -772,10 +818,10 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           hoverBackgroundColor: 'rgba(255,99,132,0.4)',
           hoverBorderColor: 'rgba(255,99,132,1)',
 
-          data:valuesBadReviews,
+          data: valuesBadReviews,
         },
       ],
-      
+
     };
     const options = {
       tooltips: {
@@ -784,12 +830,12 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       },
       maintainAspectRatio: false
     }
-    var nbGood=0;
-    var nbBad=0;
-    var nbNatural=0;
-    this.state.tweets.map(data=>{
-      if(data.sentiment===0) nbNatural++;
-      else if (data.sentiment<0) nbBad++;
+    var nbGood = 0;
+    var nbBad = 0;
+    var nbNatural = 0;
+    this.state.tweets.map(data => {
+      if (data.sentiment === 0) nbNatural++;
+      else if (data.sentiment < 0) nbBad++;
       else nbGood++;
     })
     const pie = {
@@ -813,31 +859,31 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           ],
         }],
     };
-    var goodTopics=[];
-    var goodOcc=[];
-    var badTopics=[];
-    var baddOcc=[];
-    var naturalTopics=[];
-    var naturaldOcc=[];
-   
-    this.state.naturalTopics.map(data=>{
+    var goodTopics = [];
+    var goodOcc = [];
+    var badTopics = [];
+    var baddOcc = [];
+    var naturalTopics = [];
+    var naturaldOcc = [];
+
+    this.state.naturalTopics.map(data => {
       naturalTopics.push(data.topic)
       naturaldOcc.push(data.occ)
     })
-    this.state.bestTopics.map(data=>{
+    this.state.bestTopics.map(data => {
       goodTopics.push(data.topic)
       goodOcc.push(data.occ)
     })
-    this.state.worstTopics.map(data=>{
+    this.state.worstTopics.map(data => {
       badTopics.push(data.topic)
       baddOcc.push(data.occ)
     })
-    
+
     const Gooddoughnut = {
-      labels:goodTopics.slice(0,10),
+      labels: goodTopics.slice(0, 10),
       datasets: [
         {
-          data:goodOcc.slice(0,10),
+          data: goodOcc.slice(0, 10),
           backgroundColor: [
             'lime',
             'Cyan',
@@ -862,14 +908,14 @@ valuesNaturalReviews.push(data.nbNaturalRev)
             'Teal',
             'Brown',
           ],
-          
+
         }],
     };
     const Naturaldoughnut = {
-      labels:naturalTopics.slice(0,10),
+      labels: naturalTopics.slice(0, 10),
       datasets: [
         {
-          data:naturaldOcc.slice(0,10),
+          data: naturaldOcc.slice(0, 10),
           backgroundColor: [
             'lime',
             'Cyan',
@@ -897,10 +943,10 @@ valuesNaturalReviews.push(data.nbNaturalRev)
         }],
     };
     const baddoughnut = {
-      labels:badTopics.slice(0,10),
+      labels: badTopics.slice(0, 10),
       datasets: [
         {
-          data:baddOcc.slice(0,10),
+          data: baddOcc.slice(0, 10),
           backgroundColor: [
             'lime',
             'Cyan',
@@ -927,308 +973,211 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           ],
         }],
     };
-    
+
     this.pageSize = 20;
-   // if(this.state.tweets.length!=0)
+    // if(this.state.tweets.length!=0)
     //this.pagesCount = this.state.tweets.length/20;
-    if(tweets.length!=0){
+    if (tweets.length != 0) {
       this.pagesCount = Math.ceil(tweets.length / this.pageSize);
       console.log(tweets.length)
     }
-   
-    
+
+
     return (
       <div className="animated fadeIn">
-         
-     
-                  <Row>
+
+
+        <Row>
           <Col>
             <Card>
-              
+
               <CardHeader>
-              ALL REVIEWS
+                ALL REVIEWS
               </CardHeader>
-              
+
               <CardBody>
-              <FormGroup row>
-                    <Col md="3">
-                      <Label>Inline Radios</Label>
-                    </Col>
-                    <Col md="9">
-                      <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="inline-radio1" name="inline-radios" onClick={()=>this.NaturalReviews("Good")} value="Good" />
-                        <Label className="form-check-label" check htmlFor="inline-radio1">Good</Label>
-                      </FormGroup>
-                      <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="inline-radio2" name="inline-radios"  onClick={()=>this.NaturalReviews("Natural")} value="Natural" />
-                        <Label className="form-check-label" check htmlFor="inline-radio2">Natural</Label>
-                      </FormGroup>
-                      <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="inline-radio3" name="inline-radios"  onClick={()=>this.NaturalReviews("Bad")} value="Bad" />
-                        <Label className="form-check-label" check htmlFor="inline-radio3">Bad</Label>
-                      </FormGroup>
-                    </Col>
-                  </FormGroup>
-            
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="selectLg">Month</Label>
-                    </Col>
-                    <Col xs="12" md="9" size="lg">
-                      <Input type="select" name="selectLg" onChange={this.monthsSelection.bind(this)} id="selectLg" bsSize="lg">
-                        <option value="0"  >Please select</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                      </Input>
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="selectLg">Year</Label>
-                    </Col>
-                    <Col xs="12" md="9" size="lg">
-                      <Input type="select" name="selectLg" onChange={this.yearsSelection.bind(this)}   id="selectLg" bsSize="lg">
-                        <option value="0">Please select</option>
-                        {this.state.tabYears.map((y,i)=>
+                <FormGroup row>
+                  <Col md="3">
+                    <Label>Inline Radios</Label>
+                  </Col>
+                  <Col md="9">
+                    <FormGroup check inline>
+                      <Input className="form-check-input" type="radio" id="inline-radio1" name="inline-radios" onClick={() => this.NaturalReviews("Good")} value="Good" />
+                      <Label className="form-check-label" check htmlFor="inline-radio1">Good</Label>
+                    </FormGroup>
+                    <FormGroup check inline>
+                      <Input className="form-check-input" type="radio" id="inline-radio2" name="inline-radios" onClick={() => this.NaturalReviews("Natural")} value="Natural" />
+                      <Label className="form-check-label" check htmlFor="inline-radio2">Natural</Label>
+                    </FormGroup>
+                    <FormGroup check inline>
+                      <Input className="form-check-input" type="radio" id="inline-radio3" name="inline-radios" onClick={() => this.NaturalReviews("Bad")} value="Bad" />
+                      <Label className="form-check-label" check htmlFor="inline-radio3">Bad</Label>
+                    </FormGroup>
+                    <FormGroup check inline>
+                      <Input className="form-check-input" type="radio" id="inline-radio1" name="inline-radios" onClick={() => this.NaturalReviews("all")} value="all" />
+                      <Label className="form-check-label" check htmlFor="inline-radio1">Reset All</Label>
+                    </FormGroup>
+                  </Col>
+                </FormGroup>
+
+                <FormGroup row>
+                  <Col md="3">
+                    <Label htmlFor="selectLg">Month</Label>
+                  </Col>
+                  <Col xs="12" md="9" size="lg">
+                    <Input type="select" name="selectLg" onChange={this.monthsSelection.bind(this)} id="monthes" bsSize="lg">
+                      <option value="0"  >Please select</option>
+                      <option value="1">January</option>
+                      <option value="2">February</option>
+                      <option value="3">March</option>
+                      <option value="4">April</option>
+                      <option value="5">May</option>
+                      <option value="6">June</option>
+                      <option value="7">July</option>
+                      <option value="8">August</option>
+                      <option value="9">September</option>
+                      <option value="10">October</option>
+                      <option value="11">November</option>
+                      <option value="12">December</option>
+                    </Input>
+                  </Col>
+                </FormGroup>
+                <FormGroup row>
+                  <Col md="3">
+                    <Label htmlFor="selectLg">Year</Label>
+                  </Col>
+                  <Col xs="12" md="9" size="lg">
+                    <Input type="select" name="selectLg" onChange={this.yearsSelection.bind(this)} id="years" bsSize="lg">
+                      <option value="0">Please select</option>
+                      {this.state.tabYears.map((y, i) =>
                         <option value={y}>{y}</option>
-                        )
-                        }
-                        
-                        
-                      </Input>
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="text-input">Subject</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input type="text" id="text-input" onFocus={this.focusSubject} onChange={this.subjectSearch.bind(this)} onKeyDown={this.subjectSearchEff.bind(this)} name="text-input"  />
-                      <FormText color="muted">Type help word</FormText>
-                    </Col>
-                  </FormGroup>
+                      )
+                      }
+
+
+                    </Input>
+                  </Col>
+                </FormGroup>
+                <FormGroup row>
+                  <Col md="3">
+                    <Label htmlFor="text-input">Subject</Label>
+                  </Col>
+                  <Col xs="12" md="9">
+                    <Input type="text" id="subject" onFocus={this.focusSubject} onChange={this.subjectSearch.bind(this)} onKeyDown={this.subjectSearchEff.bind(this)} name="text-input" />
+                    <FormText color="muted">Type help word</FormText>
+                  </Col>
+                </FormGroup>
                 <br />
                 <React.Fragment>
-      
-      <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
-                  <thead className="thead-light">
-                  <tr>
-                    <th ><i className="icon-people"></i></th>
-                    <th>Date</th>
-                    <th >Tweet</th>
-                    <th>Sentiment</th>
-                    
-                  </tr>
-                  </thead>
-                  <tbody>
-      {this.state.finalTweets
-          .slice(
-            currentPage * this.pageSize,
-            (currentPage + 1) * this.pageSize
-          )
-          .map((tweet, i) => 
-          <tr>
-                   
-          <td>
-            <div>{tweet.userName}</div>
-            
-          </td>
-          <td >
-            {tweet.Date}
-          </td>
-          <td>
-            <div style={divStyle}>
-             {tweet.textTranslated}
-             
-            </div>
-           
-          </td>
-          <td >
-           { sent(tweet.sentiment) }
-           
-          </td>
-          
-        </tr>
-          )}
 
-                 
-              
-        <div>
-        
-         
-      </div>
-                  
-                  
-                  
-                 
-                  </tbody>
-                </Table>
-                
-      <div className="pagination-wrapper ">
-        
-        <Pagination aria-label="Page navigation example">
-          
-          <PaginationItem disabled={currentPage <= 0}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage - 1)}
-              previous
-              href="#"
-            />
-            
-          </PaginationItem>
+                  <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
+                    <thead className="thead-light">
+                      <tr>
+                        <th ><i className="icon-people"></i></th>
+                        <th>Date</th>
+                        <th >Tweet</th>
+                        <th>Sentiment</th>
 
-          
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.state.finalTweets
+                        .slice(
+                          currentPage * this.pageSize,
+                          (currentPage + 1) * this.pageSize
+                        )
+                        .map((tweet, i) =>
+                          <tr>
 
-          <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage + 1)}
-              next
-              href="#"
-            />
-            
-          </PaginationItem>
-          
-        </Pagination>
-        
-      </div>
-    </React.Fragment>
-  
-               
+                            <td>
+                              <div>{tweet.userName}</div>
+
+                            </td>
+                            <td >
+                              {tweet.Date}
+                            </td>
+                            <td>
+                              <div style={divStyle}>
+                                {tweet.textTranslated}
+
+                              </div>
+
+                            </td>
+                            <td >
+                              {sent(tweet.sentiment)}
+
+                            </td>
+
+                          </tr>
+                        )}
+
+
+
+                      <div>
+
+
+                      </div>
+
+
+
+
+                    </tbody>
+                  </Table>
+
+                  <div className="pagination-wrapper ">
+
+                    <Pagination aria-label="Page navigation example">
+
+                      <PaginationItem disabled={currentPage <= 0}>
+
+                        <PaginationLink
+                          onClick={e => this.handleClick(e, currentPage - 1)}
+                          previous
+                          href="#"
+                        />
+
+                      </PaginationItem>
+
+
+
+                      <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
+
+                        <PaginationLink
+                          onClick={e => this.handleClick(e, currentPage + 1)}
+                          next
+                          href="#"
+                        />
+
+                      </PaginationItem>
+
+                    </Pagination>
+
+                  </div>
+                </React.Fragment>
+
+
               </CardBody>
             </Card>
           </Col>
         </Row>
-        
 
-  <Card>
-            <CardHeader>
-              PERFORMANCE PER MONTH
-             
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Bar data={bar} options={options} />
-              </div>
-            </CardBody>
-          </Card>
- 
-        <CardColumns className="cols-2">
-        <Col>
+
         <Card>
-            <CardHeader>
-              Good Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              
-              <div className="chart-wrapper">
-                <Doughnut data={Gooddoughnut}  onElementsClick={elems => { 
-                  
-                  console.log( elems[0]._index);
-                  }}/>
-              </div>
-            </CardBody>
-          </Card>
-  </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-            Bad Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Doughnut data={baddoughnut} />
-                
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-            Natural Topics Distribution
-              <div className="card-header-actions">
-                <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
-                </a>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Doughnut data={Naturaldoughnut} />
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
-          <Col>
-          <Card>
-            <CardHeader>
-              REVIEWS DISTRIBUTION
-             
-            </CardHeader>
-            <CardBody>
-              <div className="chart-wrapper">
-                <Pie data={pie} />
-              </div>
-            </CardBody>
-          </Card>
-          </Col>
+          <CardHeader>
+            PERFORMANCE PER MONTH
 
-        
-        </CardColumns>
-        
+            </CardHeader>
+          <CardBody>
+            <div className="chart-wrapper">
+              <Bar data={bar} options={options} />
+            </div>
+          </CardBody>
+        </Card>
 
-       
-        
 
-  
-                    
-          
-                    
-                   
-                    
-
-        
       </div>
     );
   }
-  /* render(){
-    return (
-      <div>
-        <center><h1>Contact List</h1></center>
-        {this.state.contacts.map((contact) => (
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">{contact.name}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">{contact.email}</h6>
-              <p class="card-text">{contact.company.catchPhrase}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  };*/
 }
 
 export default Criteria;
