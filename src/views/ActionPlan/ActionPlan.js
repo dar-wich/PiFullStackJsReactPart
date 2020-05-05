@@ -583,11 +583,11 @@ class ActionPlan extends Component {
   handleSubmit(event) {
    // for(let i=0;i<this.state.tabInputs.length;i++){
 
-    var solutions=[event.target.solution.value]
+    var solutions=event.target.solution.value
    var prob={
       Title:event.target.Title.value,
       Description:event.target.Description.value,
-      Solutions :solutions
+      Solutions :{solution:solutions,status:"Waiting",date:new Date()}
     }
     const requestOptions = {
       method: 'POST',
@@ -672,7 +672,12 @@ class ActionPlan extends Component {
     var obj=data;
     var val="rmv"+i
    var newVal=document.getElementById(val).value
-    obj.Solutions.push(newVal)
+   var sol={
+     solution:newVal,
+     status:"waiting",
+     date: new Date()
+   }
+    obj.Solutions.push(sol)
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -708,12 +713,30 @@ class ActionPlan extends Component {
     })
     .catch(console.log)
   }
+  doneSolution(data,j){
+    data.Solutions[j].status="done"
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+  };
+    fetch('http://localhost:9000/thoughts/updateSolutionStatus?indice='+j,requestOptions)
+   
+    .then((data) => {
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.componentDidMount()
+      
+    })
+    .catch(console.log)
+  }
   updateSolution(e,data,j,i){
     console.log(j)
     var val="index"+j+i
    var newVal=document.getElementById(val).value
     var obj=data;
-    obj.Solutions[j]=newVal;
+    obj.Solutions[j].solution=newVal;
+    
     console.log(obj)
     console.log(newVal)
    const requestOptions = {
@@ -826,7 +849,15 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       baddOcc.push(data.occ)
     })
     
-
+    function Greeting(props) {
+      //const isLoggedIn = props.isLoggedIn;
+     console.log("cccc"+props.j)
+      if (props.status==="Waiting") {
+        return   <Button  color="success" active onClick={props.event}>Done</Button>;
+      }
+      else return null
+    //  return <GuestGreeting />;
+    }
     
     this.pageSize = 20;
    // if(this.state.tweets.length!=0)
@@ -879,12 +910,14 @@ valuesNaturalReviews.push(data.nbNaturalRev)
   
   <div>
     
-    <Input type="text" id={solution+j+i} name="solution"   defaultValue={e}  />
+    <Input type="text" id={solution+j+i} name="solution"   defaultValue={e.solution}  />
+    <Greeting status={e.status} event={()=>this.doneSolution(data,j)} index={j} />
     <Button  color="info" type="submit" active onClick={() => this.updateSolution(e,data,j,i)}  >Update</Button>
     
 
    
                 <Button  color="danger" active onClick={() => this.removeSolution(data,j)}>Remove</Button>
+               
             
                
   </div>  
