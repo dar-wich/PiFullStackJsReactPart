@@ -543,8 +543,34 @@ class ActionPlan extends Component {
       
     })
     .catch(console.log)
-  }
+    
   
+    fetch('http://localhost:9000/thoughts/chartSolutions?indiceProb=0')
+   
+    .then((data) => {
+  
+      
+    })
+    .catch(console.log)
+
+    
+  }
+  /*componentDidUpdate() {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: this.state.problems[0]
+  };
+  console.log("cccccc")
+  console.log(this.state.problems[0])
+    fetch('http://localhost:9000/thoughts/chartSolutions',requestOptions)
+   
+    .then((data) => {
+   console.log(data)
+      
+    })
+    .catch(console.log)
+}*/
   i=10
   j=0;
   constructor(props) {
@@ -674,7 +700,7 @@ class ActionPlan extends Component {
    var newVal=document.getElementById(val).value
    var sol={
      solution:newVal,
-     status:"waiting",
+     status:"Waiting",
      date: new Date()
    }
     obj.Solutions.push(sol)
@@ -758,7 +784,34 @@ class ActionPlan extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
   
   render() {
-  
+ 
+ 
+    const line = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      datasets: [
+        {
+          label: 'My First dataset',
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          borderColor: 'rgba(75,192,192,1)',
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: 'rgba(75,192,192,1)',
+          pointBackgroundColor: '#fff',
+          pointBorderWidth: 1,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+          pointHoverBorderColor: 'rgba(220,220,220,1)',
+          pointHoverBorderWidth: 2,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data: [65, 59, 80, 81, 56, 55, 40],
+        },
+      ],
+    };  
     //let element=this.state.tweets.slice(this.j,this.i);
     const tabMonths=['January','February','March','April','May','June','July','August','September','October','November','December']
     const { currentPage } = this.state;
@@ -851,11 +904,28 @@ valuesNaturalReviews.push(data.nbNaturalRev)
     
     function Greeting(props) {
       //const isLoggedIn = props.isLoggedIn;
-     console.log("cccc"+props.j)
+     var month=new Date(props.date).getMonth()+1
+     var day=new Date(props.date).getUTCDate()
+     var date=day+"-"+month+"-"+new Date(props.date).getFullYear()
+   //  var solution="index";
       if (props.status==="Waiting") {
-        return   <Button  color="success" active onClick={props.event}>Done</Button>;
+        return  <div> 
+          <Badge>{date}</Badge>
+          <Input type="text"  id={props.idSolInput} name="solution"   defaultValue={props.val}  />
+          
+          <Button  color="success" active onClick={props.event}>Done</Button>
+        <Button  color="info" type="submit" active onClick={props.eventUpdate}  >Update</Button>
+    
+
+   
+                <Button  color="danger" active onClick={props.eventRemove}>Remove</Button>
+                </div>
       }
-      else return null
+      else return  <div>
+        <Badge>{date}</Badge>
+        <Input type="text" disabled id={props.idSolInput} name="solution"   defaultValue={props.val}  />
+        
+        </div>;
     //  return <GuestGreeting />;
     }
     
@@ -910,13 +980,9 @@ valuesNaturalReviews.push(data.nbNaturalRev)
   
   <div>
     
-    <Input type="text" id={solution+j+i} name="solution"   defaultValue={e.solution}  />
-    <Greeting status={e.status} event={()=>this.doneSolution(data,j)} index={j} />
-    <Button  color="info" type="submit" active onClick={() => this.updateSolution(e,data,j,i)}  >Update</Button>
     
-
-   
-                <Button  color="danger" active onClick={() => this.removeSolution(data,j)}>Remove</Button>
+    <Greeting status={e.status} date={e.date} idSolInput={solution+j+i} val={e.solution} event={()=>this.doneSolution(data,j)} eventUpdate={()=>this.updateSolution(e,data,j,i)} eventRemove={()=> this.removeSolution(data,j)} index={j} />
+    
                
             
                
@@ -940,7 +1006,21 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                 </div>
               </CardBody>
             </Card>
-        
+            <Card>
+            <CardHeader>
+              Line Chart
+              <div className="card-header-actions">
+                <a href="http://www.chartjs.org" className="card-header-action">
+                  <small className="text-muted">docs</small>
+                </a>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="chart-wrapper">
+                <Line data={line} options={options} />
+              </div>
+            </CardBody>
+          </Card>
          
             <Card>
               <CardHeader>
@@ -1001,7 +1081,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
       
         
 
-       
+           
         
 
   
