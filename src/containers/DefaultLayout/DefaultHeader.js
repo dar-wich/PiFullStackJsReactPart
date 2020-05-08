@@ -4,7 +4,7 @@ import { Badge, UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle
 import PropTypes from 'prop-types';
 
 import { AppAsideToggler, AppNavbarBrand, AppSidebarToggler } from '@coreui/react';
-import logo from '../../assets/img/brand/logo.svg'
+import logo from '../../assets/img/brand/logo.png'
 import sygnet from '../../assets/img/brand/sygnet.svg'
 import { useHistory } from "react-router-dom";
 const propTypes = {
@@ -15,7 +15,10 @@ const defaultProps = {};
 
 class DefaultHeader extends Component {4
 
-  
+  onLogout(){
+    localStorage.setItem('user',[])
+    
+  }
   render() {
    
 
@@ -39,7 +42,7 @@ class DefaultHeader extends Component {4
             </DropdownToggle>
             <DropdownMenu right>
               <Link to='/users'><DropdownItem ><i className="fa fa-shield"></i> Manage Users</DropdownItem></Link>
-            <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-lock"></i> Logout</DropdownItem>
+           <Link to='/login'> <DropdownItem onClick={e => this.onLogout()}><i className="fa fa-lock"></i> Logout</DropdownItem></Link>
             </DropdownMenu>
           </UncontrolledDropdown>
          

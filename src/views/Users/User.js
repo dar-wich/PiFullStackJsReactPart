@@ -1,5 +1,29 @@
 import React, { Component } from 'react';
-import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Col,
+  Collapse,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Fade,
+  Form,
+  FormGroup,
+  FormText,
+  FormFeedback,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButtonDropdown,
+  InputGroupText,
+  Label,
+  Row,Table
+} from 'reactstrap';
 
 import usersData from './UsersData'
 
@@ -13,6 +37,7 @@ class User extends Component {
 
     return (
       <div className="animated fadeIn">
+        
         <Row>
           <Col lg={6}>
             <Card>

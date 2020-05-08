@@ -5,16 +5,30 @@ import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGr
 import {browserHistory} from 'react-router'
 import { Redirect } from 'react-router-dom';
 class Login extends Component {
-
-
-  state = {
-    redirect: false
+constructor(props){
+  super(props);
+  this.validate=this.validate.bind(this)
+  this.state = {
+    redirect: false,
+    msg:'',
+    msgemail:''
   }
-  setRedirect = (event) => {
-var obj={
-  email:document.getElementById("email").value,
-  password:document.getElementById("password").value
 }
+
+  
+
+  validate(e){
+
+    if(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(e.target.value)!=true){
+      this.setState({msgemail:'Invalid mail'})
+    }
+     if(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(e.target.value)==true) {
+      
+      this.setState({msgemail:''})
+    }
+  }
+  setRedirect()  {
+var test = false;
 
 fetch('http://localhost:9000/users/login?email='+document.getElementById("email").value+'&password='+document.getElementById("password").value)
     .then((res)=>
@@ -25,32 +39,33 @@ fetch('http://localhost:9000/users/login?email='+document.getElementById("email"
     ).then((data)=>{
       
       
-      if(JSON.stringify(data)!=[]){
-        console.log(JSON.stringify(data))
-        localStorage.setItem('user',JSON.stringify(data))
-        return <Redirect to='/' />
-      }
-    })
+     // alert(this.state.redirect)
+     if(data._id==null){
+      this.setState({redirect:false})
+
+    this.setState({msg:'Verify your email or password'})
+     }
     
-  // alert(localStorage.getItem("user"))
-  // setTimeout(() => {
-    
-    
+     else if(data._id!=null){
+      this.setState({redirect:true})
       
-      
-      
+      localStorage.setItem('user',JSON.stringify(data))
+     }
+   })
     
-    
- //  }, 2000);
-   
+ 
+
     
   }
-  renderRedirect = () => {
-   // alert(localStorage.getItem("user"))
-   var o = localStorage.getItem("user")
-      alert(o)
-     // return <Redirect to='/' />
+  renderRedirect =() =>{
     
+
+    if (this.state.redirect) {
+
+      return <Redirect to='/dashboard' />
+    }
+ 
+   
   }
  
   
@@ -73,20 +88,23 @@ fetch('http://localhost:9000/users/login?email='+document.getElementById("email"
                             <i className="icon-user"></i>
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input type="email" placeholder="Email" name="email" id="email" autoComplete="email" />
+                        <Input type="email" onBlur={this.validate} required placeholder="Email" name="email" id="email" autoComplete="email" />
                       </InputGroup>
+                      <div id="msgemail" ><p  style={{color: "red"}}>{this.state.msgemail}</p></div>
+                      
                       <InputGroup className="mb-4">
                         <InputGroupAddon addonType="prepend">
                           <InputGroupText>
                             <i className="icon-lock"></i>
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input type="password" id="password" name="password" placeholder="Password" autoComplete="current-password" />
+                        <Input type="password" required id="password" name="password" placeholder="Password" autoComplete="current-password" />
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                       
-                          <Button  onClick={this.setRedirect}  color="primary" className="px-4">Login</Button>
+                          <div id="msg" ><p  style={{color: "red"}}>{this.state.msg}</p></div>
+                        {this.renderRedirect()}
+                          <Button  onClick={()=>this.setRedirect()} color="primary" className="px-4">Login</Button>
                         </Col>
                        
                       </Row>

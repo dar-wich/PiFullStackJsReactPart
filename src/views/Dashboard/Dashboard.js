@@ -525,7 +525,7 @@ class Dashboard extends Component {
   i=10
   j=0;
   constructor(props) {
-    
+  
     super(props);
 
     this.toggle = this.toggle.bind(this);

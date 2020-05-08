@@ -604,6 +604,7 @@ class ActionPlan extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.toggleAccordion = this.toggleAccordion.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
       dropdownOpen: false,
       radioSelected: 2,
@@ -636,7 +637,7 @@ class ActionPlan extends Component {
   
   handleSubmit(event) {
    // for(let i=0;i<this.state.tabInputs.length;i++){
-
+    
     var solutions=event.target.solution.value
    var prob={
       Title:event.target.Title.value,
@@ -657,8 +658,12 @@ class ActionPlan extends Component {
       
     })
     .catch(console.log)
-    this.componentDidMount();
+    document.getElementById("title").value=""
+    document.getElementById("desc").value=""
+    document.getElementById("sol").value=""
     
+    this.componentDidMount()
+    event.preventDefault();
 
   }
   toggle() {
@@ -713,7 +718,8 @@ class ActionPlan extends Component {
   removeProblem(data){
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+      'Content-Type': 'application/json' },
       body: JSON.stringify(data)
   };
     fetch('http://localhost:9000/thoughts/removeProb',requestOptions)
@@ -1092,14 +1098,14 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                 <strong>Basic Form</strong> Elements
               </CardHeader>
               <CardBody>
-                <Form  className="form-horizontal" onSubmit={this.handleSubmit}>
+                <Form className="form-horizontal" onSubmit={this.handleSubmit}>
                   
                   <FormGroup row>
                     <Col md="3">
                       <Label htmlFor="text-input">Problem</Label>
                     </Col>
                     <Col xs="12" md="9">
-                      <Input type="text" id="text-input" name="Title" placeholder="Problem" />
+                      <Input type="text" id="title" name="Title" placeholder="Problem" />
                     </Col>
                   </FormGroup>
                  
@@ -1110,7 +1116,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                       <Label htmlFor="textarea-input">Descrition</Label>
                     </Col>
                     <Col xs="12" md="9">
-                      <Input type="textarea" name="Description" id="textarea-input" rows="9"
+                      <Input type="textarea" name="Description" id="desc" rows="9"
                              placeholder="Content..." />
                     </Col>
                   </FormGroup>
@@ -1125,7 +1131,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
              
                       
 
-  <Input type="text" id="text-input" name="solution" placeholder="Problem"  />
+  <Input type="text" id="sol" name="solution" placeholder="Problem"  />
 
                      
                       
