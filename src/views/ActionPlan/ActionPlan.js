@@ -563,13 +563,21 @@ class ActionPlan extends Component {
     /*  this.setState({ tweets: data })
       console.log(this.state.tweets)*/
       this.setState({ solutionsChart: data })
-     
+     console.log(this.state.solutionsChart)
      console.log(data)
      var j=0
-   for(let i=0;i<this.state.solutionsChart.length-1;i++){
-     j++;
-    tabdate.push("Solution "+j)
-   }
+     if(this.state.solutionsChart.length==1){
+      this.setState({ solutionsChart: [data[0].previous,data[0].solution] })
+      tabdate.push("Solution 1")
+     }
+     else{
+      
+      for(let i=0;i<this.state.solutionsChart.length-1;i++){
+        j++;
+       tabdate.push("Solution "+j)
+      }
+     }
+  
     
     this.setState({dates:tabdate})
     }
@@ -637,7 +645,7 @@ class ActionPlan extends Component {
   
   handleSubmit(event) {
    // for(let i=0;i<this.state.tabInputs.length;i++){
-    
+    event.preventDefault();
     var solutions=event.target.solution.value
    var prob={
       Title:event.target.Title.value,
@@ -663,7 +671,6 @@ class ActionPlan extends Component {
     document.getElementById("sol").value=""
     
     this.componentDidMount()
-    event.preventDefault();
 
   }
   toggle() {

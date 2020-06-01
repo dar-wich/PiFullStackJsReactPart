@@ -99,7 +99,76 @@ class Users extends Component {
       event.preventDefault();
   }
   render() {
+    var u =JSON.parse(localStorage.getItem('user'))
 
+    function TableSuperAdmin(props){
+console.log("zazzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+if(u.role=='Super Admin'){
+
+ return  (<Col xs="12" sm="6">
+  <Card>
+    <CardHeader>
+      <strong>Add/Update</strong>
+      <small> User</small>
+    </CardHeader>
+    <CardBody>
+      <Form onSubmit={props.event}>
+        <FormGroup>
+          <Label htmlFor="company">Company</Label>
+          <Input type="text" id="company" value="Lufthansa" disabled name="company" />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="vat">Name</Label>
+          <Input type="text" id="vat" placeholder="Name" name="name" required/>
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="street">Last Name</Label>
+          <Input type="text" id="street" placeholder="Last Name" name="lName" required/>
+        </FormGroup>
+        <FormGroup row className="my-0">
+          <Col xs="8">
+            <FormGroup>
+              <Label htmlFor="city">Email</Label>
+              <Input type="text" id="city" placeholder="Email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"/>
+            </FormGroup>
+          </Col>
+          <Col xs="4">
+            <FormGroup>
+              <Label htmlFor="postal-code">Password</Label>
+              <Input type="password" id="postal-code" name="psw" placeholder="Password" required/>
+            </FormGroup>
+          </Col>
+        </FormGroup>
+        <FormGroup >
+
+          <Label htmlFor="role">Role</Label>
+
+
+          <Input type="select" name="role" id="role" >
+            <option value="Admin"  >Admin</option>
+            <option value="Super Admin">Super Admin</option>
+
+          </Input>
+
+        </FormGroup>
+        <Row>
+          <Col xs="6">
+
+            <Button type="submit" color="primary" className="px-4">Submit</Button>
+          </Col>
+
+        </Row>
+      </Form>
+    </CardBody>
+  </Card>
+</Col>)
+}
+else {
+  return null
+}
+     
+    }
+console.log(localStorage.getItem('user'))
    function UserRow(props) {
       const user = props.user
       const userLink = `/users/${user.id}`
@@ -111,7 +180,22 @@ class Users extends Component {
               status === 'Banned' ? 'danger' :
                 'primary'
       }
-    
+      var u=JSON.parse(localStorage.getItem('user'))
+    if(u.role=='Admin'){
+      return (
+        <tr key={user._id.toString()}>
+          <th scope="row"><Link to={userLink}>{user.lastName}</Link></th>
+          <td><Link to={userLink}>{user.name}</Link></td>
+          <td>{new Date(user.date).getFullYear() + "-" + (new Date(user.date).getMonth() + 1) + "-" + new Date(user.date).getDate()}</td>
+          
+          <td>{user.role}</td>
+          <td><Button onClick={props.event} disabled color='danger'>Remove</Button></td>
+        
+        </tr>
+      )
+
+    }
+    else{
       return (
         <tr key={user._id.toString()}>
           <th scope="row"><Link to={userLink}>{user.lastName}</Link></th>
@@ -121,6 +205,8 @@ class Users extends Component {
           <td><Button onClick={props.event} color='danger'>Remove</Button></td>
         </tr>
       )
+    }
+    
     }
     const userList = this.state.users
 
@@ -152,63 +238,7 @@ class Users extends Component {
               </CardBody>
             </Card>
           </Col>
-          <Col xs="12" sm="6">
-            <Card>
-              <CardHeader>
-                <strong>Add/Update</strong>
-                <small> User</small>
-              </CardHeader>
-              <CardBody>
-                <Form onSubmit={this.addNew}>
-                  <FormGroup>
-                    <Label htmlFor="company">Company</Label>
-                    <Input type="text" id="company" value="Lufthansa" disabled name="company" />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label htmlFor="vat">Name</Label>
-                    <Input type="text" id="vat" placeholder="Name" name="name" required/>
-                  </FormGroup>
-                  <FormGroup>
-                    <Label htmlFor="street">Last Name</Label>
-                    <Input type="text" id="street" placeholder="Last Name" name="lName" required/>
-                  </FormGroup>
-                  <FormGroup row className="my-0">
-                    <Col xs="8">
-                      <FormGroup>
-                        <Label htmlFor="city">Email</Label>
-                        <Input type="text" id="city" placeholder="Email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"/>
-                      </FormGroup>
-                    </Col>
-                    <Col xs="4">
-                      <FormGroup>
-                        <Label htmlFor="postal-code">Password</Label>
-                        <Input type="password" id="postal-code" name="psw" placeholder="Password" required/>
-                      </FormGroup>
-                    </Col>
-                  </FormGroup>
-                  <FormGroup >
-
-                    <Label htmlFor="role">Role</Label>
-
-
-                    <Input type="select" name="role" id="role" >
-                      <option value="Admin"  >Admin</option>
-                      <option value="Super Admin">Super Admin</option>
-
-                    </Input>
-
-                  </FormGroup>
-                  <Row>
-                    <Col xs="6">
-
-                      <Button type="submit" color="primary" className="px-4">Submit</Button>
-                    </Col>
-
-                  </Row>
-                </Form>
-              </CardBody>
-            </Card>
-          </Col>
+          <TableSuperAdmin event={this.addNew}/>
         </Row>
         <Row>
           <Col xl={6}>
