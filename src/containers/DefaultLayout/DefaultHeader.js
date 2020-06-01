@@ -16,7 +16,7 @@ const defaultProps = {};
 class DefaultHeader extends Component {4
 
   onLogout(){
-    localStorage.setItem('user',[])
+    localStorage.clear()
     
   }
   render() {

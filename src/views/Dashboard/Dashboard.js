@@ -2,6 +2,7 @@ import React, { Component, lazy, Suspense } from 'react';
 import {   Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import ReactDOM from 'react-dom';
 import { Bar, Line ,Pie,Doughnut,Polar} from 'react-chartjs-2';
+import { Redirect } from 'react-router-dom';
 import {
   Badge,
   Button,
@@ -469,8 +470,23 @@ const mainChartOpts = {
 };
 
 class Dashboard extends Component {
+
+  connection(){
+    if(localStorage.getItem("user")==null)
+    this.setState({redirect:true})
+  }
+
+  renderRedirect(){
+    
+    if(this.state.redirect)
+    return <Redirect to='/login' />
+  }
   
   componentDidMount() {
+    console.log("before"+this.state.redirect)
+    console.log("uuuuuuuser     "+localStorage.getItem("user"))
+    this.connection()
+    console.log("after"+this.state.redirect)
     fetch('http://localhost:9000/preproc/getAllTweets')
     .then(res => res.json())
     .then((data) => {
@@ -539,7 +555,8 @@ class Dashboard extends Component {
       performances:[],
       bestTopics:[],
       worstTopics:[],
-      naturalTopics:[]
+      naturalTopics:[],
+      redirect:false
       
     };
   
@@ -584,6 +601,8 @@ class Dashboard extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
   render() {
+    
+    
     
     //let element=this.state.tweets.slice(this.j,this.i);
     const tabMonths=['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -799,9 +818,10 @@ valuesNaturalReviews.push(data.nbNaturalRev)
     }
     
     return (
+      
       <div className="animated fadeIn">
         
-     
+        {this.renderRedirect()}
         <Row>
           <Col xs="12" sm="6" lg="3">
             <Card className="text-white bg-info">
