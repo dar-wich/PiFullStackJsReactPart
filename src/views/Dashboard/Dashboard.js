@@ -753,6 +753,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
           data:naturaldOcc.slice(0,10),
           backgroundColor: [
             'lime',
+
             'Cyan',
             'Pink',
             'Orange',
@@ -762,8 +763,10 @@ valuesNaturalReviews.push(data.nbNaturalRev)
             'Crimson',
             'Teal',
             'Brown',
+           
           ],
           hoverBackgroundColor: [
+          
             'lime',
             'Cyan',
             'Pink',
@@ -786,11 +789,15 @@ valuesNaturalReviews.push(data.nbNaturalRev)
             'lime',
             'Cyan',
             'Pink',
+
             'Orange',
             'Steel',
             'Yellow',
+
             'Magenta',
+
             'Crimson',
+            
             'Teal',
             'Brown',
           ],
