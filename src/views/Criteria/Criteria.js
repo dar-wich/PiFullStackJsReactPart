@@ -992,7 +992,10 @@ class Criteria extends Component {
             <Card>
 
               <CardHeader>
-                ALL REVIEWS
+                REVIEWS
+                <div className="card-header-actions">
+                  <Badge>{this.state.finalTweets.length} problems</Badge>
+                </div>
               </CardHeader>
 
               <CardBody>

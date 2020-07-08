@@ -482,6 +482,7 @@ const mainChartOpts = {
 class ActionPlan extends Component {
   
   componentDidMount() {
+    
     fetch('http://localhost:9000/preproc/getAllTweets')
     .then(res => res.json())
     .then((data) => {
@@ -517,12 +518,14 @@ class ActionPlan extends Component {
       for(let i=1;i<data.length;i++)
       tf.push(false)
      this.setState({accordion:tf})
+     this.setState({labelStat:data[0].Title})
       
       
     })
     .catch(console.log)
+    
 
-
+    
     fetch('http://localhost:9000/thoughts/worstTopics')
     .then(res => res.json())
     .then((data) => {
@@ -545,13 +548,35 @@ class ActionPlan extends Component {
     .catch(console.log)
     
   
-    fetch('http://localhost:9000/thoughts/chartSolutions?indiceProb=0')
-   
-    .then((data) => {
   
+
+
+
       
-    })
-    .catch(console.log)
+ 
+  fetch('http://localhost:9000/thoughts/chartSolutions?indiceProb=0')
+  .then(res => res.json())
+  .then((data) => {
+    if(data!=[]){
+      var tabdate=[];
+      tabdate.push("Someday")
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.setState({ solutionsChart: data })
+     
+     console.log(data)
+     var j=0
+   for(let i=0;i<this.state.solutionsChart.length-1;i++){
+     j++;
+    tabdate.push("Solution "+j)
+   }
+    
+    this.setState({dates:tabdate})
+    }
+   
+  })
+  .catch(console.log)
+ 
 
     
   }
@@ -592,13 +617,16 @@ class ActionPlan extends Component {
       collapse: false,
       accordion: [],
       finalSolutions:[],
-      problems:[]
+      problems:[],
+      solutionsChart:[],
+      dates:[],
+      labelStat:""
       
       
       
     };
   
-  
+    
     
     
   }
@@ -626,8 +654,10 @@ class ActionPlan extends Component {
     /*  this.setState({ tweets: data })
       console.log(this.state.tweets)*/
       
+      
     })
     .catch(console.log)
+    this.componentDidMount();
     
 
   }
@@ -635,7 +665,7 @@ class ActionPlan extends Component {
     this.setState({ collapse: !this.state.collapse });
   }
   
-  toggleAccordion(tab) {
+  toggleAccordion(tab,title) {
 
     const prevState = this.state.accordion;
     const state = prevState.map((x, index) => tab === index ? !x : false);
@@ -643,6 +673,8 @@ class ActionPlan extends Component {
     this.setState({
       accordion: state,
     });
+    console.log("cccccc"+tab)
+    this.stats(tab,title)
   }
   handleClick(e, index) {
     
@@ -782,15 +814,45 @@ class ActionPlan extends Component {
   }
 
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
+   stats(prob,title){
+    //
+  var tabdate=[];
   
+  tabdate.push("Someday")
+  fetch('http://localhost:9000/thoughts/chartSolutions?indiceProb='+prob)
+  .then(res => res.json())
+  .then((data) => {
+    if(data!=[]){
+      this.setState({labelStat:title})
+      var tabdate=[];
+      tabdate.push("Someday")
+    /*  this.setState({ tweets: data })
+      console.log(this.state.tweets)*/
+      this.setState({ solutionsChart: data })
+     
+     console.log(data)
+     var j=0
+   for(let i=0;i<this.state.solutionsChart.length-1;i++){
+     j++;
+    tabdate.push("Solution "+j)
+   }
+    
+    this.setState({dates:tabdate})
+    }
+   
+  })
+  .catch(console.log)
+    
+  }
   render() {
  
+    
  
     const line = {
-      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      labels: this.state.dates,
       datasets: [
         {
-          label: 'My First dataset',
+          label: this.state.labelStat,
           fill: false,
           lineTension: 0.1,
           backgroundColor: 'rgba(75,192,192,0.4)',
@@ -808,7 +870,10 @@ class ActionPlan extends Component {
           pointHoverBorderWidth: 2,
           pointRadius: 1,
           pointHitRadius: 10,
-          data: [65, 59, 80, 81, 56, 55, 40],
+          
+            data:this.state.solutionsChart,
+          
+         
         },
       ],
     };  
@@ -952,7 +1017,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
               <CardHeader>
                 <i className="fa fa-align-justify"></i> Frequent problems
                 <div className="card-header-actions">
-                  <Badge>NEW</Badge>
+                  <Badge>{this.state.problems.length} problems</Badge>
                 </div>
               </CardHeader>
               <CardBody>
@@ -961,7 +1026,7 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                    
                   <Card className="mb-0">
                   <CardHeader id="headingOne">
-                    <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(i)} aria-expanded={this.state.accordion[i]} aria-controls="collapseOne">
+                    <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(i,data.Title)} aria-expanded={this.state.accordion[i]} aria-controls="collapseOne">
                       <h5 className="m-0 p-0">{data.Title}</h5>
                     </Button>
                     <div className="card-header-actions">
@@ -1008,10 +1073,10 @@ valuesNaturalReviews.push(data.nbNaturalRev)
             </Card>
             <Card>
             <CardHeader>
-              Line Chart
+              Problem chart
               <div className="card-header-actions">
                 <a href="http://www.chartjs.org" className="card-header-action">
-                  <small className="text-muted">docs</small>
+                  
                 </a>
               </div>
             </CardHeader>
@@ -1091,127 +1156,11 @@ valuesNaturalReviews.push(data.nbNaturalRev)
                    
                     
 
-        <Row>
-          <Col>
-            <Card>
-              <CardHeader>
-              ALL REVIEWS
-              </CardHeader>
-              <CardBody>
-                
-                <br />
-                <React.Fragment>
-      
-      <Table id="tabTweets" hover responsive className="table-outline mb-0 d-none d-sm-table">
-                  <thead className="thead-light">
-                  <tr>
-                    <th ><i className="icon-people"></i></th>
-                    <th>Date</th>
-                    <th >Tweet</th>
-                    <th>Sentiment</th>
-                    
-                  </tr>
-                  </thead>
-                  <tbody>
-      {this.state.tweets
-          .slice(
-            currentPage * this.pageSize,
-            (currentPage + 1) * this.pageSize
-          )
-          .map((tweet, i) => 
-          <tr>
-                   
-          <td>
-            <div>{tweet.userName}</div>
-            
-          </td>
-          <td >
-            {tweet.Date}
-          </td>
-          <td>
-            <div style={divStyle}>
-             {tweet.textTranslated}
-             
-            </div>
-           
-          </td>
-          <td >
-           { sent(tweet.sentiment) }
-           
-          </td>
-          
-        </tr>
-          )}
-
-                 
-              
-        <div>
-        
-         
-      </div>
-                  
-                  
-                  
-                 
-                  </tbody>
-                </Table>
-                
-      <div className="pagination-wrapper ">
-        
-        <Pagination aria-label="Page navigation example">
-          
-          <PaginationItem disabled={currentPage <= 0}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage - 1)}
-              previous
-              href="#"
-            />
-            
-          </PaginationItem>
-
-          
-
-          <PaginationItem disabled={currentPage >= this.pagesCount - 1}>
-            
-            <PaginationLink
-              onClick={e => this.handleClick(e, currentPage + 1)}
-              next
-              href="#"
-            />
-            
-          </PaginationItem>
-          
-        </Pagination>
-        
-      </div>
-    </React.Fragment>
-  
-               
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
         
       </div>
     );
   }
-  /* render(){
-    return (
-      <div>
-        <center><h1>Contact List</h1></center>
-        {this.state.contacts.map((contact) => (
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">{contact.name}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">{contact.email}</h6>
-              <p class="card-text">{contact.company.catchPhrase}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  };*/
+
 }
 
 export default ActionPlan;
